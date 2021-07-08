@@ -39,9 +39,18 @@ if (1) else local b = 1@n@
 if (1) local a = 1 else local b = 1@n@
 if (1) do@n@                            -- FAIL
 if (1) do end@n@
+if (1) do@n@end
 if (1) else do@n@                       -- FAIL
 if (1) else do local b = 1@n@           -- FAIL
 if (1) else do local b = 1@n@end
 function f()if (1) local a = 1 end      -- FAIL
 function f()if (1) local a = 1@n@end    -- FAIL
 function f() if (1) local a = 1@n@end
+//// bonus challenge!
+//if (1) end local a = 1 do@n@
+//if (1) else end do@n@
+//if (1) end while (nil) do@n@
+//if (1) end while (nil) local a = 1 do@n@    -- FAIL
+//if (1) end while (nil) do local a = 1@n@
+//// scopes must be right!
+//if (1) do local a = 1@n@end

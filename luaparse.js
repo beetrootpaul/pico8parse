@@ -319,6 +319,15 @@
       };
     }
 
+    , assignmentOperatorStatement: function(operator, variables, init) {
+      return {
+          type: 'AssignmentOperatorStatement'
+        , operator: operator
+        , variables: variables
+        , init: init
+      };
+    }
+
     , callStatement: function(expression) {
       return {
           type: 'CallStatement'
@@ -514,6 +523,18 @@
   if (Array.prototype.indexOf)
     indexOf = function (array, element) {
       return array.indexOf(element);
+    };
+
+  // From https://github.com/behnammodi/polyfill/blob/master/array.polyfill.js
+
+  var isArray = /* istanbul ignore next */ function (arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+  };
+
+  /* istanbul ignore else */
+  if (Array.isArray)
+    isArray = function (arg) {
+      return Array.isArray(arg);
     };
 
   // Iterate through an array of objects and return the index of an object
@@ -736,7 +757,7 @@
         if (isDecDigit(next)) return scanNumericLiteral();
         if (46 === next) {
           if (46 === input.charCodeAt(index + 2)) return scanVarargLiteral();
-          return scanPunctuator('..');
+          return scanPunctuatorMaybeAssignmentOperators('..');
         }
         return scanPunctuator('.');
 
@@ -748,10 +769,10 @@
         if (features.bitwiseOperators) {
           if (62 === next) {
             if (features.bitshiftAdditionalOperators) {
-              if (62 === next) return scanPunctuator('>>>');
-              if (60 === next) return scanPunctuator('>><');
+              if (62 === next) return scanPunctuatorMaybeAssignmentOperators('>>>');
+              if (60 === next) return scanPunctuatorMaybeAssignmentOperators('>><');
             }
-            return scanPunctuator('>>');
+            return scanPunctuatorMaybeAssignmentOperators('>>');
           }
         }
         if (61 === next) return scanPunctuator('>=');
@@ -761,8 +782,8 @@
         if (features.bitwiseOperators) {
           if (60 === next) {
             if (features.bitshiftAdditionalOperators)
-              if (62 === next) scanPunctuator('<<>');
-            return scanPunctuator('<<');
+              if (62 === next) scanPunctuatorMaybeAssignmentOperators('<<>');
+            return scanPunctuatorMaybeAssignmentOperators('<<');
           }
         }
         if (61 === next) return scanPunctuator('<=');
@@ -798,32 +819,33 @@
         // Check for integer division op (//)
         if (features.integerDivision)
           if (47 === next) return scanPunctuator('//');
-        return scanPunctuator('/');
+        return scanPunctuatorMaybeAssignmentOperators('/');
 
       case 92: // \
         if (!features.backslashIntegerDivision)
           break;
-        return scanPunctuator('\\');
+        return scanPunctuatorMaybeAssignmentOperators('\\');
 
       case 94: // ^
         if (features.smileyBitwiseXor)
-          if (94 === next) return scanPunctuator('^^')
-        return scanPunctuator('^');
+          if (94 === next) return scanPunctuatorMaybeAssignmentOperators('^^')
+        return scanPunctuatorMaybeAssignmentOperators('^');
 
       case 38: case 124: // & |
         if (!features.bitwiseOperators)
           break;
-        return scanPunctuator(input.charAt(index));
+        return scanPunctuatorMaybeAssignmentOperators(input.charAt(index));
 
       case 64: case 36: // @ $
         if (!features.peekPokeOperators)
           break;
         return scanPunctuator(input.charAt(index));
 
-        /* fall through */
-      case 42: case 37: case 44: case 123: case 125:
-      case 93: case 40: case 41: case 59: case 35: case 45:
-      case 43: // * % , { } ] ( ) ; # - +
+      case 42: case 37: case 45: case 43: // * % - +
+        return scanPunctuatorMaybeAssignmentOperators(input.charAt(index));
+
+      case 44: case 123: case 125: case 93:
+      case 40: case 41: case 59: case 35: // , { } ] ( ) ; #
         return scanPunctuator(input.charAt(index));
     }
 
@@ -907,6 +929,19 @@
       , lineStart: lineStart
       , range: [tokenStart, index]
     };
+  }
+
+  // If the reached punctuator can also be the begining of an assignment
+  // operators (and if they are enabled in the features) this tests for the
+  // ending '='; if such is found the punctuator is 1 longer, otherwize
+  // defaults to `scanPunctuator()`.
+
+  function scanPunctuatorMaybeAssignmentOperators(valuePunctuator) {
+    if (features.assignmentOperators) {
+      if (61 === input.charCodeAt(index + valuePunctuator.length)) // op=
+        return scanPunctuator(valuePunctuator + '=');
+    }
+    return scanPunctuator(valuePunctuator);
   }
 
   // A vararg literal consists of three dots.
@@ -1537,6 +1572,35 @@
       return '#-~'.indexOf(token.value) >= 0;
     }
     if (Keyword === token.type) return 'not' === token.value;
+    return false;
+  }
+
+  // Check if the punctuator is a valid assignment operator.
+  // (eg. excludes '<=', '>=')
+  //
+  // No, this is not quite optimized as would only get called every so ofter
+  // and will most of the time hit for '<=', '>=' as returning false and
+  // potentially some '+=', '-=', .. (the first list) as returning true
+
+  function isAssignmentOperator(token) {
+    if (Punctuator === token.type && '=' === token.value.charAt(token.value.length-1)) {
+      // Most common
+      if ('<=' === token.value || '>=' === token.value) return false;
+      // Feature independants
+      if (indexOf(['+=', '-=', '*=', '/=', '%=', '^=', '..='], token.value) >= 0) return true;
+      // Least common
+      return indexOf([
+        features.backslashIntegerDivision && '\\=',
+        features.bitwiseOperators && '|=',
+        features.bitwiseOperators && '&=',
+        features.bitwiseOperators && '<<=',
+        features.bitwiseOperators && '>>=',
+        features.bitshiftAdditionalOperators && '>>>=',
+        features.bitshiftAdditionalOperators && '<<>=',
+        features.bitshiftAdditionalOperators && '>><=',
+        features.smileyBitwiseXor && '^^='
+      ], token.value) >= 0;
+    }
     return false;
   }
 
@@ -2289,7 +2353,14 @@
       return unexpected(token);
     }
 
-    expect('=');
+    var assignmentOperator = false;
+
+    // Try to find the operator if this is realy an assignment operator statement
+    // XXX: not sure this should be done like this...
+    if (features.assignmentOperators && !consume('=') && isAssignmentOperator(token)) {
+      assignmentOperator = token.value.slice(0, token.value.length-1);
+      next();
+    } else expect('=');
 
     var values = [];
 
@@ -2298,7 +2369,10 @@
     } while (consume(','));
 
     pushLocation(startMarker);
-    return finishNode(ast.assignmentStatement(targets, values));
+    var assignmentNode = assignmentOperator ?
+      ast.assignmentOperatorStatement(assignmentOperator, targets, values)
+      : ast.assignmentStatement(targets, values);
+    return finishNode(assignmentNode);
   }
 
   // ### Non-statements
@@ -2792,27 +2866,30 @@
       integerDivision: false,
       // Below rules were added for PICO-8
       // XXX: (move to appropriate doc please)
-      // with singleLineIf, the following becomes valid (not the 'do'):
+      // The added syntax for singleLine[..] is pretty broken, see the test
+      // for some kind of overview (./test/scaffolding/conditional)
+      //
+      // With singleLineIf, the following becomes valid (note the 'do'):
       //    if ::= 'if' '(' exp ')' 'do' block {elif} ['else' block] 'end'
-      // this code has an error (missing space after "name()"):
+      // This code has an error (missing space after "name()"):
       //    ```
       //    function name()if (exp) block
       //      block
       //    end
       //    ```
-      // this code prints "no":
+      // This code prints "no":
       //    ```
       //    if (1) do local a = "yes"
       //      print(a or "no")
       //    end
       //    ```
-      // and this code too:
+      // And this code too:
       //    ```
       //    if (nil) else do local a = "yes"
       //      print(a or "no")
       //    end
       //    ```
-      // so the actual added syntax is closer to:
+      // So the actual added syntax is closer to:
       //    if ::= '\s' 'if' '(' exp ')'
       //          [ block [ 'else' [ 'do' block_else_do '\n' ]
       //                    block_else_then
@@ -2821,8 +2898,8 @@
       //            | 'then'
       //            ] block_if_then {elif} ['else' block] 'end'
       //          ]
-      // block_if_do has for parent block_if_then
-      // block_else_do has for parent block_else_then
+      // ... where `block_if_do` has for parent `block_if_then`
+      // and `block_else_do` has for parent `block_else_then`
       //
       // singleLineIf and singleLineWhile cannot be empty
       // `if (1)` error, `if (1) else` no error
@@ -2836,8 +2913,8 @@
       traditionalNotEqual: true,  // a != b
       bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
       peekPokeOperators: true,    // @a   %a   $a
-      backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above))
-      smileyBitwiseXor: true      // a ^^ b (also disables a ~ b ie. **makes it invalid** (maybe))
+      backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above), same about assignment operators)
+      smileyBitwiseXor: true      // a ^^ b (also disables a ~ b ie. **makes it invalid** (maybe), same about assignment operators)
     },
     // NOTE: untested
     'PICO-8-0.2.2': {
@@ -2852,7 +2929,7 @@
     if ('undefined' !== typeof _versionId) {
       let features = versionFeatures[_versionId];
 
-      if (Object.hasOwnProperty.call(features, '_inherits') && Array.isArray(features._inherits)) {
+      if (Object.hasOwnProperty.call(features, '_inherits') && isArray(features._inherits)) {
         for (let k = 0; k < features._inherits.length; k++) {
           const inherited = expandInherted(features._inherits[k]);
           // Entries in "features" (child) will override inherited ones (that are in "inherited")
