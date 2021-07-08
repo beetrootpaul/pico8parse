@@ -28,3 +28,20 @@ if 1 then return return end             -- FAIL
 if 1 then end; if 1 then end;
 if then end                             -- FAIL
 if 1 then elseif then end               -- FAIL
+
+// { "luaVersion": "PICO-8-0.2.1" }
+// singleLineIf
+if (1)@n@                               -- FAIL
+if (1) local a = 1@n@
+if (1) else@n@
+if (1) local a = 1 else@n@
+if (1) else local b = 1@n@
+if (1) local a = 1 else local b = 1@n@
+if (1) do@n@                            -- FAIL
+if (1) do end@n@
+if (1) else do@n@                       -- FAIL
+if (1) else do local b = 1@n@           -- FAIL
+if (1) else do local b = 1@n@end
+function f()if (1) local a = 1 end      -- FAIL
+function f()if (1) local a = 1@n@end    -- FAIL
+function f() if (1) local a = 1@n@end

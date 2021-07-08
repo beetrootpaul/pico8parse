@@ -2661,8 +2661,104 @@
       unicodeEscapes: true,
       imaginaryNumbers: true,
       integerSuffixes: true
+    },
+    // NOTE: p8 file format layout (not the png.p8 but the text p8)
+    'PICO-8': {
+      p8FileHeader: true, // no shebang but a 2 lines header (giving a version num)
+      p8SectionLua: '__lua__',
+      p8SectionGfx: '__gfx__',
+      p8SectionGff: '__gff__',
+      p8SectionLabel: '__label__',
+      p8SectionMap: '__map__',
+      p8SectionSfx: '__sfx__',
+      p8SectionMusic: '__music__',
+    },
+    // NOTE: first implemented version (some features may have existed before 0.2.1)
+    'PICO-8-0.2.1': {
+      _inherits: [ '5.2', 'PICO-8' ],
+      // XXX:
+      // with singleLineIf, the following becomes valid (not the 'do'):
+      //    if ::= 'if' '(' exp ')' 'do' block {elif} ['else' block] 'end'
+      // this code has an error (missing space after "name()"):
+      //    ```
+      //    function name()if (exp) block
+      //      block
+      //    end
+      //    ```
+      // this code prints "no":
+      //    ```
+      //    if (1) do local a = "yes"
+      //      print(a or "no")
+      //    end
+      //    ```
+      // and this code too:
+      //    ```
+      //    if (nil) else do local a = "yes"
+      //      print(a or "no")
+      //    end
+      //    ```
+      // so the actual added syntax is closer to:
+      //    if ::= '\s' 'if' '(' exp ')'
+      //          [ block [ 'else' [ 'do' block_else_do '\n' ]
+      //                    block_else_then
+      //                  ] '\n'
+      //          | [ 'do' block_if_do '\n'
+      //            | 'then'
+      //            ] block_if_then {elif} ['else' block] 'end'
+      //          ]
+      // block_if_do has for parent block_if_then
+      // block_else_do has for parent block_else_then
+      //
+      // singleLineIf and singleLineWhile cannot be empty
+      // `if (1)` error, `if (1) else` no error
+      // `while (1)` error
+      binLiteral: true,           // eg. 0b101010
+      noNumberSuffix: true,       // eg. 1LL or 1u ...
+      noExponentLiteral: true,    // eg. 1e-1
+      noComplexLiteral: true,     // eg. 1.1i
+      singleLineIf: true,         // if ::= 'if' '(' exp ')' block ['else' block] '\n'
+      singleLineWhile: true,      // while ::= 'while' '(' exp ')' block '\n'
+      singleLinePrint: true,      // the "?" that _realy needs_ to be on its own line
+      assignmentOperators: true,  // a+= b
+      traditionalNotEqual: true,  // a != b
+      bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b
+      peekPokeOperators: true,    // @a   %a   $a
+      backslashIntegerDiv: true,  // a \ b
+      smileyBitwiseXor: true       // a ^^ b (also disables a ~ b)
+    },
+    // NOTE: untested
+    'PICO-8-0.2.2': {
+      _inherits: [ 'PICO-8-0.2.1' ],
+      p8scii: true     // additional string escape sequences
     }
   };
+
+  // Expand the '_inherits' of each version (recursively).
+
+  function expandInherted(_versionId) {
+    if ('undefined' !== typeof _versionId) {
+      let features = versionFeatures[_versionId];
+
+      if (Object.hasOwnProperty.call(features, '_inherits') && Array.isArray(features._inherits)) {
+        for (let k = 0; k < features._inherits.length; k++) {
+          const inherited = expandInherted(features._inherits[k]);
+          features = assign(features, inherited);
+        }
+
+        features._inherits = [];
+      }
+
+      return features
+    }
+
+    // No version provided, expand all inplace
+    for (const versionId in versionFeatures)
+      if (Object.hasOwnProperty.call(versionFeatures, versionId))
+        versionFeatures[versionId] = expandInherted(versionId);
+  }
+
+  expandInherted()
+  exports.versionFeatures = versionFeatures;
 
   function parse(_input, _options) {
     if ('undefined' === typeof _options && 'object' === typeof _input) {
