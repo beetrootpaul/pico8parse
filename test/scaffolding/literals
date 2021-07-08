@@ -99,7 +99,7 @@ a = 0b.11
 a = 0b10.1
 a = 0b.010101
 a = 0b02                                  -- FAIL
-// noNumberSuffix
+// noNumberSuffix (integerSuffixes not truthy)
 a = 1LL                                   -- FAIL
 a = 1ll                                   -- FAIL
 a = 1ULL                                  -- FAIL
@@ -113,7 +113,7 @@ a = 0xfp1                                 -- FAIL
 a = 0xfp+1                                -- FAIL
 a = 0xfp-1                                -- FAIL
 a = 0xFP+9                                -- FAIL
-// noComplexLiteral
+// noComplexLiteral (imaginaryNumbers not truthy)
 a = 1i                                    -- FAIL
 a = 1.1i                                  -- FAIL
 a = 1I                                    -- FAIL

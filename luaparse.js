@@ -745,22 +745,44 @@
         return scanPunctuator('=');
 
       case 62: // >
-        if (features.bitwiseOperators)
-          if (62 === next) return scanPunctuator('>>');
+        if (features.bitwiseOperators) {
+          if (62 === next) {
+            if (features.bitshiftAdditionalOperators) {
+              if (62 === next) return scanPunctuator('>>>');
+              if (60 === next) return scanPunctuator('>><');
+            }
+            return scanPunctuator('>>');
+          }
+        }
         if (61 === next) return scanPunctuator('>=');
         return scanPunctuator('>');
 
       case 60: // <
-        if (features.bitwiseOperators)
-          if (60 === next) return scanPunctuator('<<');
+        if (features.bitwiseOperators) {
+          if (60 === next) {
+            if (features.bitshiftAdditionalOperators)
+              if (62 === next) scanPunctuator('<<>');
+            return scanPunctuator('<<');
+          }
+        }
         if (61 === next) return scanPunctuator('<=');
         return scanPunctuator('<');
 
       case 126: // ~
         if (61 === next) return scanPunctuator('~=');
-        if (!features.bitwiseOperators)
+        if (!features.bitwiseOperators || features.smileyBitwiseXor)
           break;
         return scanPunctuator('~');
+
+      case 33: // !
+        if (!features.traditionalNotEqual)
+          break;
+        // when traditionalNotEqual is truthy, both syntaxes are accepted:
+        // "!=" token are disguised as "~=" (takes advantage of the fact
+        // that scanPunctuator does not care about what's actually there
+        // and most importantly that they are the same length)
+        if (61 === next) return scanPunctuator('~=');
+        break;
 
       case 58: // :
         if (features.labels)
@@ -778,14 +800,30 @@
           if (47 === next) return scanPunctuator('//');
         return scanPunctuator('/');
 
+      case 92: // \
+        if (!features.backslashIntegerDivision)
+          break;
+        return scanPunctuator('\\');
+
+      case 94: // ^
+        if (features.smileyBitwiseXor)
+          if (94 === next) return scanPunctuator('^^')
+        return scanPunctuator('^');
+
       case 38: case 124: // & |
         if (!features.bitwiseOperators)
           break;
+        return scanPunctuator(input.charAt(index));
+
+      case 64: case 36: // @ $
+        if (!features.peekPokeOperators)
+          break;
+        return scanPunctuator(input.charAt(index));
 
         /* fall through */
-      case 42: case 94: case 37: case 44: case 123: case 125:
+      case 42: case 37: case 44: case 123: case 125:
       case 93: case 40: case 41: case 59: case 35: case 45:
-      case 43: // * ^ % , { } ] ( ) ; # - +
+      case 43: // * % , { } ] ( ) ; # - +
         return scanPunctuator(input.charAt(index));
     }
 
@@ -1073,8 +1111,11 @@
     }
 
     // Binary exponents are optional
+    //
+    // TODO: things like "a = 0x1p = 16" are valid in Lua PICO-8 in which case this just return normally
+    // (yes it assumes noExponentLiteral implies this behavior above...)
     var foundBinaryExponent = false;
-    if ('pP'.indexOf(input.charAt(index) || null) >= 0) {
+    if (!features.noExponentLiteral && 'pP'.indexOf(input.charAt(index) || null) >= 0) {
       foundBinaryExponent = true;
       ++index;
 
@@ -1097,7 +1138,8 @@
 
     return {
       value: (digit + fraction) * binaryExponent,
-      hasFractionPart: foundFraction || foundBinaryExponent
+      hasFractionPart: foundFraction || foundBinaryExponent,
+      hasExponentPart: foundBinaryExponent
     };
   }
 
@@ -1140,7 +1182,8 @@
 
     return {
       value: digit + fraction,
-      hasFractionPart: foundFraction
+      hasFractionPart: foundFraction,
+      hasExponentPart: false
     };
   }
 
@@ -1160,8 +1203,11 @@
     }
 
     // Exponent part is optional.
+    //
+    // Things like "a = 1e = 5" are valid in Lua PICO-8 in which case this just return normally
+    // (yes it assumes noExponentLiteral implies this behavior above...)
     var foundExponent = false;
-    if ('eE'.indexOf(input.charAt(index) || null) >= 0) {
+    if (!features.noExponentLiteral && 'eE'.indexOf(input.charAt(index) || null) >= 0) {
       foundExponent = true;
       ++index;
       // Sign part is optional.
@@ -1175,7 +1221,8 @@
 
     return {
       value: parseFloat(input.slice(tokenStart, index)),
-      hasFractionPart: foundFraction || foundExponent
+      hasFractionPart: foundFraction || foundExponent,
+      hasExponentPart: foundExponent
     };
   }
 
@@ -1485,7 +1532,10 @@
   }
 
   function isUnary(token) {
-    if (Punctuator === token.type) return '#-~'.indexOf(token.value) >= 0;
+    if (Punctuator === token.type) {
+      if (features.peekPokeOperators) return '#-~@%$'.indexOf(token.value) >= 0;
+      return '#-~'.indexOf(token.value) >= 0;
+    }
     if (Keyword === token.type) return 'not' === token.value;
     return false;
   }
@@ -2435,10 +2485,11 @@
     if (1 === length) {
       switch (charCode) {
         case 94: return 12; // ^
+        case 92: return 10; // \
         case 42: case 47: case 37: return 10; // * / %
         case 43: case 45: return 9; // + -
         case 38: return 6; // &
-        case 126: return 5; // ~
+        case 126: if (!features.smileyBitwiseXor) return 5; // ~
         case 124: return 4; // |
         case 60: case 62: return 3; // < >
       }
@@ -2449,9 +2500,14 @@
         case 60: case 62:
             if('<<' === operator || '>>' === operator) return 7; // << >>
             return 3; // <= >=
+        case 94:
+            if ('^^' === operator) return 12; // ^^
         case 61: case 126: return 3; // == ~=
         case 111: return 1; // or
       }
+    } else if (3 === length) {
+      // The only operators that can make it here are '>>>', '<<>' and '>><'
+      return 7
     } else if (97 === charCode && 'and' === operator) return 2;
     return 0;
   }
@@ -2730,7 +2786,12 @@
     // NOTE: first implemented version (some features may have existed before 0.2.1)
     'PICO-8-0.2.1': {
       _inherits: [ '5.2', 'PICO-8' ],
-      // XXX:
+      integerSuffixes: false,
+      imaginaryNumbers: false,
+      bitwiseOperators: true,
+      integerDivision: false,
+      // Below rules were added for PICO-8
+      // XXX: (move to appropriate doc please)
       // with singleLineIf, the following becomes valid (not the 'do'):
       //    if ::= 'if' '(' exp ')' 'do' block {elif} ['else' block] 'end'
       // this code has an error (missing space after "name()"):
@@ -2767,18 +2828,16 @@
       // `if (1)` error, `if (1) else` no error
       // `while (1)` error
       binLiteral: true,           // eg. 0b101010
-      noNumberSuffix: true,       // eg. 1LL or 1u ...
       noExponentLiteral: true,    // eg. 1e-1
-      noComplexLiteral: true,     // eg. 1.1i
       singleLineIf: true,         // if ::= 'if' '(' exp ')' block ['else' block] '\n'
       singleLineWhile: true,      // while ::= 'while' '(' exp ')' block '\n'
       singleLinePrint: true,      // the "?" that _realy needs_ to be on its own line
-      assignmentOperators: true,  // a+= b
+      assignmentOperators: true,  // a += b
       traditionalNotEqual: true,  // a != b
-      bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b
+      bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
       peekPokeOperators: true,    // @a   %a   $a
-      backslashIntegerDiv: true,  // a \ b
-      smileyBitwiseXor: true      // a ^^ b (also disables a ~ b)
+      backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above))
+      smileyBitwiseXor: true      // a ^^ b (also disables a ~ b ie. **makes it invalid** (maybe))
     },
     // NOTE: untested
     'PICO-8-0.2.2': {
@@ -2796,7 +2855,8 @@
       if (Object.hasOwnProperty.call(features, '_inherits') && Array.isArray(features._inherits)) {
         for (let k = 0; k < features._inherits.length; k++) {
           const inherited = expandInherted(features._inherits[k]);
-          features = assign(features, inherited);
+          // Entries in "features" (child) will override inherited ones (that are in "inherited")
+          features = assign({}, inherited, features);
         }
 
         features._inherits = [];
