@@ -84,7 +84,7 @@
     // The variable's name will be passed as the only parameter
     , onLocalDeclaration: null
     // The version of Lua targeted by the parser (string; allowed values are
-    // '5.1', '5.2', '5.3').
+    // '5.1', '5.2', '5.3', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2').
     , luaVersion: '5.1'
     // Encoding mode: how to interpret code units higher than U+007F in input
     , encodingMode: 'none'
@@ -962,7 +962,8 @@
     var character = input.charAt(index)
       , next = input.charAt(index + 1);
 
-    var literal = ('0' === character && 'xX'.indexOf(next || null) >= 0) ?
+    var literal = (features.binLiteral && '0' === character && 'bB'.indexOf(next || null) >= 0) ?
+      readBinLiteral() : ('0' === character && 'xX'.indexOf(next || null) >= 0) ?
       readHexLiteral() : readDecLiteral();
 
     var foundImaginaryUnit = readImaginaryUnitSuffix()
@@ -1046,12 +1047,15 @@
     digitStart = index += 2; // Skip 0x part
 
     // A minimum of one hex digit is required.
-    if (!isHexDigit(input.charCodeAt(index)))
+    // "0x.A" is valid from Lua 5.2 onward
+    if (features.noTrailingDotInHexNumeral && !isHexDigit(input.charCodeAt(index)))
       raise(null, errors.malformedNumber, input.slice(tokenStart, index));
 
     while (isHexDigit(input.charCodeAt(index))) ++index;
     // Convert the hexadecimal digit to base 10.
-    digit = parseInt(input.slice(digitStart, index), 16);
+    if (digitStart < index)
+      digit = parseInt(input.slice(digitStart, index), 16);
+    else digit = 0; // No decimal part.
 
     // Fraction part is optional.
     var foundFraction = false;
@@ -1094,6 +1098,49 @@
     return {
       value: (digit + fraction) * binaryExponent,
       hasFractionPart: foundFraction || foundBinaryExponent
+    };
+  }
+
+  // PICO-8 binaries acts similarly to hexadecimals (optional fraction part).
+  // Because this is only used by PICO-8 which does not support number suffixes,
+  // this is a simplified algorithm (eg. no BinaryExp, assumes !noTrailingDotInBinNumeral..).
+  //
+  //     Digit := toDec(digit)
+  //     Fraction := toDec(fraction) / 2 ^ fractionCount
+  //     Number := Digit + Fraction
+
+  function readBinLiteral() {
+    var fraction = 0 // defaults to 0 as it gets summed
+      , digit, fractionStart, digitStart;
+
+    digitStart = index += 2; // Skip 0b part
+
+    while (isBinDigit(input.charCodeAt(index))) ++index;
+    // Convert the hexadecimal digit to base 10.
+    if (digitStart < index)
+      digit = parseInt(input.slice(digitStart, index), 2);
+    else digit = 0; // No decimal part.
+
+    // Fraction part is optional.
+    var foundFraction = false;
+    if ('.' === input.charAt(index)) {
+      foundFraction = true;
+      fractionStart = ++index;
+
+      while (isBinDigit(input.charCodeAt(index))) ++index;
+      fraction = input.slice(fractionStart, index);
+
+      // Empty fraction parts should default to 0, others should be converted
+      // 0.x form so we can use summation at the end.
+      fraction = (fractionStart === index) ? 0
+        : parseInt(fraction, 2) / Math.pow(2, index - fractionStart);
+    }
+
+    // No binary exponents.
+
+    return {
+      value: digit + fraction,
+      hasFractionPart: foundFraction
     };
   }
 
@@ -1385,6 +1432,10 @@
 
   function isHexDigit(charCode) {
     return (charCode >= 48 && charCode <= 57) || (charCode >= 97 && charCode <= 102) || (charCode >= 65 && charCode <= 70);
+  }
+
+  function isBinDigit(charCode) {
+    return 48 === charCode || 49 === charCode
   }
 
   // From [Lua 5.2](http://www.lua.org/manual/5.2/manual.html#8.1) onwards
@@ -2629,6 +2680,9 @@
 
   var versionFeatures = {
     '5.1': {
+      // Lua supports trailing "." in hex numarals from 5.2 onward; this "feature" keep
+      // from parsing that as correct for Lua 5.1
+      noTrailingDotInHexNumeral: true
     },
     '5.2': {
       labels: true,
@@ -2724,7 +2778,7 @@
       bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b
       peekPokeOperators: true,    // @a   %a   $a
       backslashIntegerDiv: true,  // a \ b
-      smileyBitwiseXor: true       // a ^^ b (also disables a ~ b)
+      smileyBitwiseXor: true      // a ^^ b (also disables a ~ b)
     },
     // NOTE: untested
     'PICO-8-0.2.2': {
