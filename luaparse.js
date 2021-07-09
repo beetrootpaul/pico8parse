@@ -887,7 +887,7 @@
     return false;
   }
 
-  // ... expect when it does, see comments above the following functions:
+  // ... except when it does, see comments above the following functions:
   //  - skipWhiteSpace
   //  - isBlockFollow
   //  - isEnd
@@ -895,12 +895,12 @@
   // This will deal well enough with any dangling `isEnd.newLineIsEnd`.
 
   function consumeEnd() {
-    var newLineWasEnd = isEnd.newLineIsEnd;
-
     if (isEnd(token)) {
-      if (newLineWasEnd && !isEnd.newLineIsEnd)
+      if (isEnd.foundEndIsNewLine) {
         // "consumes" the newline (which sits between the previousToken and current token)
+        isEnd.newLineIsEnd = false;
         return true;
+      }
       // Consumes an actual 'end' character sequence
       return consume('end');
     }
@@ -1670,7 +1670,9 @@
 
   function isBlockFollow(token) {
     if (EOF === token.type) return true;
-    if (Keyword !== token.type) return false;
+    // Sadly with the singleLine syntax, an Identifier token may by
+    // right after a newline character that should count as a 'end'
+    //if (Keyword !== token.type) return false;
     switch (token.value) {
       case 'else': case 'elseif': case 'until':
         return true;
@@ -1688,6 +1690,7 @@
   //    if (!consumeEnd()) expect('end');
 
   function isEnd(token) {
+    isEnd.foundEndIsNewLine = false;
     if ('end' === token.value) return true;
 
     if (true === isEnd.newLineIsEnd) {
@@ -1702,23 +1705,37 @@
 
       // Breaks upon any non-blank character
       while (!found) {
-        charCode = input.charCodeAt(peekIndex);
-        if (!isWhiteSpace(charCode)) break;
+        charCode = input.charCodeAt(peekIndex++);
         found = isLineTerminator(charCode);
+        if (!isWhiteSpace(charCode)) break;
       }
 
       if (found) {
-        isEnd.newLineIsEnd = false;
+        isEnd.foundEndIsNewLine = true;
         return true;
       }
     }
 
     return false;
   }
+
   // No much clue where to put this, so it will lie as
   // property to the related function so it is at least
   // ease to see what it's meaning.
+
+  // This first flag is set when a potential single line statement
+  // is encountered and trigger the `isEnd()` and `consumeEnd()`
+  // function to consider a newline character as a valid 'end' token.
+
   isEnd.newLineIsEnd = false;
+
+  // This flag is used in `consumeEnd()` to assess whether
+  // the found 'end' token was actually a newline character
+  // (in which case, reset `isEnd.newLineIsEnd`, any next newline
+  // character should not be counted as 'end' token until told
+  // otherwise)
+
+  isEnd.foundEndIsNewLine = true;
 
   // Scope
   // -----
