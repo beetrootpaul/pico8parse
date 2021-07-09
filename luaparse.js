@@ -729,13 +729,28 @@
       scanComment();
       skipWhiteSpace();
     }
-    if (index >= length) return {
-        type : EOF
-      , value: '<eof>'
-      , line: line
-      , lineStart: lineStart
-      , range: [index, index]
-    };
+    if (index >= length) {
+      // From a single line statement, any dangling `isEnd.newLineIsEnd`
+      // makes the EOF a valid 'end' token, but this is not optionnal
+      // and will be an syntax error under certain circumstances.
+      if (isEnd.newLineIsEnd) {
+        isEnd.newLineIsEnd = false;
+        return {
+            type: Keyword
+          , value: 'end'
+          , line: line
+          , lineStart: lineStart
+          , range: [tokenStart, index]
+        };
+      }
+      return {
+          type : EOF
+        , value: '<eof>'
+        , line: line
+        , lineStart: lineStart
+        , range: [index, index]
+      };
+    }
 
     var charCode = input.charCodeAt(index)
       , next = input.charCodeAt(index + 1);
@@ -871,6 +886,47 @@
     }
     return false;
   }
+
+  // ... expect when it does, see comments above the following functions:
+  //  - skipWhiteSpace
+  //  - isBlockFollow
+  //  - isEnd
+  //
+  // This will deal well enough with any dangling `isEnd.newLineIsEnd`.
+
+  function consumeEnd() {
+    var newLineWasEnd = isEnd.newLineIsEnd;
+
+    if (isEnd(token)) {
+      if (newLineWasEnd && !isEnd.newLineIsEnd)
+        // "consumes" the newline (which sits between the previousToken and current token)
+        return true;
+      // Consumes an actual 'end' character sequence
+      return consume('end');
+    }
+    return false;
+  }
+
+  // Lua PICO-8 introduced 3 (janky) whitespace-dependent syntaxes: singleLineIf,
+  // singleLineWhile and singleLinePrint. While they all require an ending newline,
+  // singleLineIf and singleLineWhile may start with any blank character, singleLinePrint
+  // must be on its own line (so starts with a newline sequence).
+  //
+  // singleLineIf and singleLineWhile actually have a more complicated relation with
+  // leading blank character; if the token preceeding the 'if' or 'while' keyword is
+  // a numeral (not just a digit character, hex is fine too) then the blank character
+  // is not necessary (notice how 7 to 10 behave):
+  //
+  //     1 -    a = 0xFFif (a) print(a)
+  //     2 -    a = "42"if (a) print(a)             -- FAIL
+  //     3 -    a = "42" if (a) print(a)
+  //     4 -    a = 0xFF;if (a) print(a)            -- FAIL
+  //     5 -    a = 0xFF; if (a) print(a)
+  //     6 -    a = 0xFF.if (a) print(a)
+  //     7 -    a = 10--[[..]]if (a) print(a)
+  //     8 -    a = ""--[[..]]if (a) print(a)       -- FAIL
+  //     9 -    a = "" --[[..]]if (a) print(a)      -- FAIL
+  //    10 -    a = ""--[[..]] if (a) print(a)
 
   function skipWhiteSpace() {
     while (index < length) {
@@ -1583,6 +1639,8 @@
   // potentially some '+=', '-=', .. (the first list) as returning true
 
   function isAssignmentOperator(token) {
+    if (1 === token.value.length) return false;
+
     if (Punctuator === token.type && '=' === token.value.charAt(token.value.length-1)) {
       // Most common
       if ('<=' === token.value || '>=' === token.value) return false;
@@ -1605,18 +1663,62 @@
   }
 
   // Check if the token syntactically closes a block.
+  //
+  // When the block (or one of its parent) is from a single line
+  // 'if's or 'while's, and no new line has been reached yet, then
+  // a new line (or EOF) is essentially a 'end' token.
 
   function isBlockFollow(token) {
     if (EOF === token.type) return true;
     if (Keyword !== token.type) return false;
     switch (token.value) {
-      case 'else': case 'elseif':
-      case 'end': case 'until':
+      case 'else': case 'elseif': case 'until':
         return true;
       default:
-        return false;
+        return isEnd(token);
     }
   }
+
+  // Complementing the comment above the `isBlockFollow()` function,
+  // `expect('end')` should never be called as is because under some
+  // conditions a '<EOL>' is considered as a valid 'end' token
+  // (despite not beeing one initially).
+  //
+  // Prefer using something along
+  //    if (!consumeEnd()) expect('end');
+
+  function isEnd(token) {
+    if ('end' === token.value) return true;
+
+    if (true === isEnd.newLineIsEnd) {
+      // Look ahead for a newline sequence or EOF...
+      // yes, "ahead" but because the token from the lex phase
+      // ignore newlines, here must check for a skipped EOL
+      // starting from the previousToken and, essentially, until
+      // the current token.
+      var peekIndex = previousToken ? previousToken.range[1] : 0
+        , found = EOF === token.type
+        , charCode;
+
+      // Breaks upon any non-blank character
+      while (!found) {
+        charCode = input.charCodeAt(peekIndex);
+        if (!isWhiteSpace(charCode)) break;
+        found = isLineTerminator(charCode);
+      }
+
+      if (found) {
+        isEnd.newLineIsEnd = false;
+        return true;
+      }
+    }
+
+    return false;
+  }
+  // No much clue where to put this, so it will lie as
+  // property to the related function so it is at least
+  // ease to see what it's meaning.
+  isEnd.newLineIsEnd = false;
 
   // Scope
   // -----
@@ -1967,23 +2069,32 @@
 
     flowContext.raiseDeferredErrors();
 
+    // XXX: can't find any "good" way of doing it so this will have to;
+    // due to the note above `skipWhiteSpace()`, the if and while handlers
+    // need to be aware of the leading token and the leading character
+    // (prior to the 'if' or 'while' itself)
+    //
+    // The taken approach is to not `next()` before calling any handler
+    // (after all, the 'local' is part of the LocalStatment and so on...)
+
     if (Keyword === token.type) {
       switch (token.value) {
-        case 'local':    next(); return parseLocalStatement(flowContext);
-        case 'if':       next(); return parseIfStatement(flowContext);
-        case 'return':   next(); return parseReturnStatement(flowContext);
-        case 'function': next();
+        case 'local':    return parseLocalStatement(flowContext);
+        case 'if':       return parseIfStatement(flowContext);
+        case 'return':   return parseReturnStatement(flowContext);
+        case 'function':
+          next();
           var name = parseFunctionName();
           return parseFunctionDeclaration(name);
-        case 'while':    next(); return parseWhileStatement(flowContext);
-        case 'for':      next(); return parseForStatement(flowContext);
-        case 'repeat':   next(); return parseRepeatStatement(flowContext);
-        case 'break':    next();
+        case 'while':    return parseWhileStatement(flowContext);
+        case 'for':      return parseForStatement(flowContext);
+        case 'repeat':   return parseRepeatStatement(flowContext);
+        case 'break':
           if (!flowContext.isInLoop())
             raise(token, errors.noLoopToBreak, token.value);
           return parseBreakStatement();
-        case 'do':       next(); return parseDoStatement(flowContext);
-        case 'goto':     next(); return parseGotoStatement(flowContext);
+        case 'do':       return parseDoStatement(flowContext);
+        case 'goto':     return parseGotoStatement(flowContext);
       }
     }
 
@@ -2018,9 +2129,10 @@
     return finishNode(ast.labelStatement(label));
   }
 
-  //     break ::= 'break'
+  //     break ::= 'break' [';']
 
   function parseBreakStatement() {
+    expect('break');
     consume(';');
     return finishNode(ast.breakStatement());
   }
@@ -2028,6 +2140,8 @@
   //     goto ::= 'goto' Name
 
   function parseGotoStatement(flowContext) {
+    expect('goto');
+
     var name = token.value
       , gotoToken = previousToken
       , label = parseIdentifier();
@@ -2039,32 +2153,72 @@
   //     do ::= 'do' block 'end'
 
   function parseDoStatement(flowContext) {
+    expect('do');
+
     if (options.scope) createScope();
     flowContext.pushScope();
     var body = parseBlock(flowContext);
     flowContext.popScope();
     if (options.scope) destroyScope();
-    expect('end');
+
+    if (!consumeEnd()) expect('end');
     return finishNode(ast.doStatement(body));
   }
 
   //     while ::= 'while' exp 'do' block 'end'
 
   function parseWhileStatement(flowContext) {
+    var canBeSingleLineWhile = features.singleLineWhile
+      , mustBeSingleLineWhile = false;
+
+    // Here it _can_ if either:
+    //  - no dangling `newLineIsEnd` (not within a single line statement)
+    //  - no previous token
+    //  - previous token is numeral
+    //  - no character before statement
+    //  - character before statement is whitespace or lineterminator
+    if (canBeSingleLineWhile /*&& true !== newLineIsEnd*/) {
+      var startIndex = token.range[0];
+      canBeSingleLineWhile = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
+      // If the previous token is not a numeral (or beginig of stream), scan backward
+      // 1 character expecting a blank character (whitespace or lineterminator)
+      if (!canBeSingleLineWhile) {
+        var previousCharCode = input.charCodeAt(startIndex-1);
+        canBeSingleLineWhile = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
+      }
+    }
+
+    expect('while');
+
+    // Here it _can_ if: - the condition is in parentheses
+    if (canBeSingleLineWhile)
+      canBeSingleLineWhile = consume('(');
     var condition = parseExpectedExpression(flowContext);
-    expect('do');
+    if (canBeSingleLineWhile) {
+      expect(')');
+      // Here it **must** if: - no 'do' token were found past the condition
+      mustBeSingleLineWhile = !consume('do');
+    } else expect('do');
+
+    // No 'do' were found: the scope of the 'while' is implicitly opened
+    // and the very next EOL is syntaxically equivalent to a 'end'
+    if (mustBeSingleLineWhile) isEnd.newLineIsEnd = true;
+
     if (options.scope) createScope();
     flowContext.pushScope(true);
     var body = parseBlock(flowContext);
     flowContext.popScope();
     if (options.scope) destroyScope();
-    expect('end');
+
+    if (!consumeEnd()) expect('end');
     return finishNode(ast.whileStatement(condition, body));
   }
 
   //     repeat ::= 'repeat' block 'until' exp
 
   function parseRepeatStatement(flowContext) {
+    expect('repeat');
+
     if (options.scope) createScope();
     flowContext.pushScope(true);
     var body = parseBlock(flowContext);
@@ -2079,6 +2233,8 @@
   //     retstat ::= 'return' [exp {',' exp}] [';']
 
   function parseReturnStatement(flowContext) {
+    expect('return');
+
     var expressions = [];
 
     if ('end' !== token.value) {
@@ -2097,6 +2253,28 @@
   //     elif ::= 'elseif' exp 'then' block
 
   function parseIfStatement(flowContext) {
+    var canBeSingleLineIf = features.singleLineIf
+      , mustBeSingleLineIf = false;
+
+    // Here it _can_ if either:
+    //  - no dangling `newLineIsEnd` (not within a single line statement)
+    //  - no previous token
+    //  - previous token is numeral
+    //  - no character before statement
+    //  - character before statement is whitespace or lineterminator
+    if (canBeSingleLineIf /*&& true !== newLineIsEnd*/) {
+      var startIndex = token.range[0];
+      canBeSingleLineIf = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
+      // If the previous token is not a numeral (or beginig of stream), scan backward
+      // 1 character expecting a blank character (whitespace or lineterminator)
+      if (!canBeSingleLineIf) {
+        var previousCharCode = input.charCodeAt(startIndex-1);
+        canBeSingleLineIf = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
+      }
+    }
+
+    expect('if');
+
     var clauses = []
       , condition
       , body
@@ -2108,14 +2286,32 @@
       marker = locations[locations.length - 1];
       locations.push(marker);
     }
+
+    // Here it _can_ if: - the condition is in parentheses
+    if (canBeSingleLineIf)
+      canBeSingleLineIf = consume('(');
     condition = parseExpectedExpression(flowContext);
-    expect('then');
+    if (canBeSingleLineIf) {
+      expect(')');
+      // Here it **must** if: - no 'then' token were found past the condition
+      mustBeSingleLineIf = !consume('then');
+    } else expect('then');
+
+    // No 'then' were found: the scope of the 'if' is implicitly opened
+    // and the very next EOL is syntaxically equivalent to a 'end'
+    if (mustBeSingleLineIf) isEnd.newLineIsEnd = true;
+
     if (options.scope) createScope();
     flowContext.pushScope();
     body = parseBlock(flowContext);
     flowContext.popScope();
     if (options.scope) destroyScope();
     clauses.push(finishNode(ast.ifClause(condition, body)));
+
+    // Single line 'if' does not accept 'elseif' clause.
+    if (mustBeSingleLineIf)
+      if ('elseif' === token.value) unexpected('elseif');
+      // (`consume('elseif')` would make an erroneous error message)
 
     if (trackLocations) marker = createLocationMarker();
     while (consume('elseif')) {
@@ -2145,18 +2341,20 @@
       clauses.push(finishNode(ast.elseClause(body)));
     }
 
-    expect('end');
+    if (!consumeEnd()) expect('end');
     return finishNode(ast.ifStatement(clauses));
   }
 
   // There are two types of for statements, generic and numeric.
   //
-  //     for ::= Name '=' exp ',' exp [',' exp] 'do' block 'end'
-  //     for ::= namelist 'in' explist 'do' block 'end'
+  //     for ::= 'for' Name '=' exp ',' exp [',' exp] 'do' block 'end'
+  //     for ::= 'for' namelist 'in' explist 'do' block 'end'
   //     namelist ::= Name {',' Name}
   //     explist ::= exp {',' exp}
 
   function parseForStatement(flowContext) {
+    expect('for');
+
     var variable = parseIdentifier()
       , body;
 
@@ -2182,7 +2380,7 @@
       flowContext.pushScope(true);
       body = parseBlock(flowContext);
       flowContext.popScope();
-      expect('end');
+      if (!consumeEnd()) expect('end');
       if (options.scope) destroyScope();
 
       return finishNode(ast.forNumericStatement(variable, start, end, step, body));
@@ -2210,7 +2408,7 @@
       flowContext.pushScope(true);
       body = parseBlock(flowContext);
       flowContext.popScope();
-      expect('end');
+      if (!consumeEnd()) expect('end');
       if (options.scope) destroyScope();
 
       return finishNode(ast.forGenericStatement(variables, iterators, body));
@@ -2228,6 +2426,8 @@
   //        | 'local' Name {',' Name} ['=' exp {',' exp}]
 
   function parseLocalStatement(flowContext) {
+    expect('local');
+
     var name
       , declToken = previousToken;
 
@@ -2357,7 +2557,7 @@
 
     // Try to find the operator if this is realy an assignment operator statement
     // XXX: not sure this should be done like this...
-    if (features.assignmentOperators && !consume('=') && isAssignmentOperator(token)) {
+    if (features.assignmentOperators && isAssignmentOperator(token)) {
       assignmentOperator = token.value.slice(0, token.value.length-1);
       next();
     } else expect('=');
@@ -2432,7 +2632,7 @@
 
     var body = parseBlock(flowContext);
     flowContext.popScope();
-    expect('end');
+    if (!consumeEnd()) expect('end');
     if (options.scope) destroyScope();
 
     isLocal = isLocal || false;
@@ -2859,7 +3059,7 @@
     },
     // NOTE: first implemented version (some features may have existed before 0.2.1)
     'PICO-8-0.2.1': {
-      _inherits: [ '5.2', 'PICO-8' ],
+      _inherits: ['5.2', 'PICO-8'],
       integerSuffixes: false,
       imaginaryNumbers: false,
       bitwiseOperators: true,
@@ -2918,7 +3118,7 @@
     },
     // NOTE: untested
     'PICO-8-0.2.2': {
-      _inherits: [ 'PICO-8-0.2.1' ],
+      _inherits: ['PICO-8-0.2.1'],
       p8scii: true     // additional string escape sequences
     }
   };
