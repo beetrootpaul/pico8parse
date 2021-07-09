@@ -670,7 +670,8 @@
   // If there's no token in the buffer it means we have reached <eof>.
 
   function unexpected(found) {
-    var near = tokenValue(lookahead);
+    var near = 'undefined' !== typeof lookahead ?
+      tokenValue(lookahead) : '<bof>';
     if ('undefined' !== typeof found.type) {
       var type;
       switch (found.type) {
@@ -860,7 +861,8 @@
         return scanPunctuatorMaybeAssignmentOperators(input.charAt(index));
 
       case 44: case 123: case 125: case 93:
-      case 40: case 41: case 59: case 35: // , { } ] ( ) ; #
+      case 40: case 41: case 59: case 35:
+      case 63: // , { } ] ( ) ; # ?
         return scanPunctuator(input.charAt(index));
     }
 
@@ -987,7 +989,7 @@
     };
   }
 
-  // If the reached punctuator can also be the begining of an assignment
+  // If the reached punctuator can also be the beginning of an assignment
   // operators (and if they are enabled in the features) this tests for the
   // ending '='; if such is found the punctuator is 1 longer, otherwize
   // defaults to `scanPunctuator()`.
@@ -1690,31 +1692,20 @@
   //    if (!consumeEnd()) expect('end');
 
   function isEnd(token) {
-    isEnd.foundEndIsNewLine = false;
-    if ('end' === token.value) return true;
-
     if (true === isEnd.newLineIsEnd) {
-      // Look ahead for a newline sequence or EOF...
-      // yes, "ahead" but because the token from the lex phase
-      // ignore newlines, here must check for a skipped EOL
-      // starting from the previousToken and, essentially, until
-      // the current token.
-      var peekIndex = previousToken ? previousToken.range[1] : 0
-        , found = EOF === token.type
-        , charCode;
-
-      // Breaks upon any non-blank character
-      while (!found) {
-        charCode = input.charCodeAt(peekIndex++);
-        found = isLineTerminator(charCode);
-        if (!isWhiteSpace(charCode)) break;
-      }
-
-      if (found) {
+      isEnd.foundEndIsNewLine = false;
+      // If previousToken is not on the same line as the current token,
+      // there is a newline sequence in between (and there can't be a token
+      // between the 2).
+      if (EOF === token.type || token.line !== previousToken.line) {
+        // In that case, this test is enough to say that a valid 'end' "token"
+        // was found (and passed! the `isEnd.foundEndIsNewLine` flag is set
+        // not to discard the current token)
         isEnd.foundEndIsNewLine = true;
         return true;
       }
     }
+    if ('end' === token.value) return true;
 
     return false;
   }
@@ -1735,7 +1726,7 @@
   // character should not be counted as 'end' token until told
   // otherwise)
 
-  isEnd.foundEndIsNewLine = true;
+  isEnd.foundEndIsNewLine = false;
 
   // Scope
   // -----
@@ -2197,7 +2188,7 @@
     if (canBeSingleLineWhile /*&& true !== newLineIsEnd*/) {
       var startIndex = token.range[0];
       canBeSingleLineWhile = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
-      // If the previous token is not a numeral (or beginig of stream), scan backward
+      // If the previous token is not a numeral (or beginning of stream), scan backward
       // 1 character expecting a blank character (whitespace or lineterminator)
       if (!canBeSingleLineWhile) {
         var previousCharCode = input.charCodeAt(startIndex-1);
@@ -2282,7 +2273,7 @@
     if (canBeSingleLineIf /*&& true !== newLineIsEnd*/) {
       var startIndex = token.range[0];
       canBeSingleLineIf = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
-      // If the previous token is not a numeral (or beginig of stream), scan backward
+      // If the previous token is not a numeral (or beginning of stream), scan backward
       // 1 character expecting a blank character (whitespace or lineterminator)
       if (!canBeSingleLineIf) {
         var previousCharCode = input.charCodeAt(startIndex-1);
@@ -2526,6 +2517,30 @@
         base = parseExpectedExpression(flowContext);
         expect(')');
         lvalue = false;
+      } else if (features.singleLinePrint && '?' === token.value) {
+        var theSingleLine = token.line
+          , previousTokenLine = previousToken ? previousToken.line : -1;
+        next();
+
+        // Must be not on the same line as previous (if any)
+        if (theSingleLine === previousTokenLine) unexpected(token);
+
+        // Next should be a valid explist (or nothing) all on the same line
+        var expressions = [];
+        var expression = parseExpression(flowContext);
+        if (previousToken.line !== theSingleLine) unexpected('?');
+        if (null != expression) expressions.push(expression);
+        while (consume(',')) {
+          expression = parseExpectedExpression(flowContext);
+          if (previousToken.line !== theSingleLine) unexpected('?');
+          expressions.push(expression);
+        }
+
+        // After what, must not be on the same line as next
+        if (theSingleLine === token.line && EOF !== token.type) unexpected('?');
+
+        var base = { type: Identifier, name: '?' };
+        return finishNode(ast.callExpression(base, expressions));
       } else {
         return unexpected(token);
       }
@@ -3125,7 +3140,7 @@
       noExponentLiteral: true,    // eg. 1e-1
       singleLineIf: true,         // if ::= 'if' '(' exp ')' block ['else' block] '\n'
       singleLineWhile: true,      // while ::= 'while' '(' exp ')' block '\n'
-      singleLinePrint: true,      // the "?" that _realy needs_ to be on its own line
+      singleLinePrint: true,      // slprint ::= '\n' '?' [explist] '\n'   the result is a CallStatement node
       assignmentOperators: true,  // a += b
       traditionalNotEqual: true,  // a != b
       bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
