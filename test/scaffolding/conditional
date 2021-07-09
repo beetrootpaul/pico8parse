@@ -48,6 +48,7 @@ if (1) local a = 1 else@n@
 if (1) else local b = 1@n@
 if (1) local a = 1 else local b = 1@n@
 if (1) do@n@                            -- FAIL
+if (1) end do@n@do end
 if (1) do end@n@
 if (1) do@n@end
 if (1) else do@n@                       -- FAIL

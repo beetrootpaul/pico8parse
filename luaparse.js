@@ -1692,8 +1692,8 @@
   //    if (!consumeEnd()) expect('end');
 
   function isEnd(token) {
+    isEnd.foundEndIsNewLine = false;
     if (true === isEnd.newLineIsEnd) {
-      isEnd.foundEndIsNewLine = false;
       // If previousToken is not on the same line as the current token,
       // there is a newline sequence in between (and there can't be a token
       // between the 2).
