@@ -84,7 +84,7 @@
     // The variable's name will be passed as the only parameter
     , onLocalDeclaration: null
     // The version of Lua targeted by the parser (string; allowed values are
-    // '5.1', '5.2', '5.3', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2').
+    // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2').
     , luaVersion: '5.1'
     // Encoding mode: how to interpret code units higher than U+007F in input
     , encodingMode: 'none'
