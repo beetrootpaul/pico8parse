@@ -2097,10 +2097,7 @@
         case 'while':    return parseWhileStatement(flowContext);
         case 'for':      return parseForStatement(flowContext);
         case 'repeat':   return parseRepeatStatement(flowContext);
-        case 'break':
-          if (!flowContext.isInLoop())
-            raise(token, errors.noLoopToBreak, token.value);
-          return parseBreakStatement();
+        case 'break':    return parseBreakStatement(flowContext);
         case 'do':       return parseDoStatement(flowContext);
         case 'goto':     return parseGotoStatement(flowContext);
       }
@@ -2109,7 +2106,7 @@
     if (features.contextualGoto &&
         token.type === Identifier && token.value === 'goto' &&
         lookahead.type === Identifier && lookahead.value !== 'goto') {
-      next(); return parseGotoStatement(flowContext);
+      return parseGotoStatement(flowContext);
     }
 
     // Assignments memorizes the location and pushes it manually for wrapper nodes.
@@ -2139,8 +2136,10 @@
 
   //     break ::= 'break' [';']
 
-  function parseBreakStatement() {
+  function parseBreakStatement(flowContext) {
     expect('break');
+    if (!flowContext.isInLoop())
+      raise(token, errors.noLoopToBreak, token.value);
     consume(';');
     return finishNode(ast.breakStatement());
   }
@@ -2804,14 +2803,14 @@
         case 47: return 10; // //
         case 46: return 8; // ..
         case 60: case 62:
-            if('<<' === operator || '>>' === operator) return 7; // << >>
+            if ('<<' === operator || '>>' === operator) return 7; // << >>
             return 3; // <= >=
         case 94:
             if ('^^' === operator) return 12; // ^^
         case 61: case 126: return 3; // == ~=
         case 111: return 1; // or
-      }
-    } else if (3 === length) {
+      }       // Other 3-length token that can get here: 'end', 'and'
+    } else if (3 === length && (60 === charCode || 62 === charCode)) {
       // The only operators that can make it here are '>>>', '<<>' and '>><'
       return 7
     } else if (97 === charCode && 'and' === operator) return 2;
