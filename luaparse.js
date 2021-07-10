@@ -735,7 +735,7 @@
       // makes the EOF a valid 'end' token, but this is not optionnal
       // and will be an syntax error under certain circumstances.
       if (isEnd.newLineIsEnd) {
-        if (EOF === token.type) {
+        if (token && EOF === token.type) {
           isEnd.newLineIsEnd = false;
           token = {
               type: Keyword
@@ -3307,6 +3307,9 @@
     lookahead = undefined;
     comments = undefined;
     tokenStart = undefined;
+    // Please just rewind the lexer properly
+    isEnd.newLineIsEnd = false;
+    isEnd.foundEndIsNewLine = false;
     // When tracking identifier scope, initialize with an empty scope.
     scopes = [[]];
     scopeDepth = 0;
