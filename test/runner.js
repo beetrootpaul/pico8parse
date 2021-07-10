@@ -181,6 +181,7 @@
       switch (node.type) {
         case 'LocalStatement':
         case 'AssignmentStatement':
+        case 'AssignmentOperatorStatement':
           visitKey('variables');
           visitKey('init');
           break;

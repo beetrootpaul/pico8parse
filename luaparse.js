@@ -84,7 +84,7 @@
     // The variable's name will be passed as the only parameter
     , onLocalDeclaration: null
     // The version of Lua targeted by the parser (string; allowed values are
-    // '5.1', '5.2', '5.3').
+    // '5.1', '5.2', '5.3', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2').
     , luaVersion: '5.1'
     // Encoding mode: how to interpret code units higher than U+007F in input
     , encodingMode: 'none'
@@ -319,6 +319,15 @@
       };
     }
 
+    , assignmentOperatorStatement: function(operator, variables, init) {
+      return {
+          type: 'AssignmentOperatorStatement'
+        , operator: operator
+        , variables: variables
+        , init: init
+      };
+    }
+
     , callStatement: function(expression) {
       return {
           type: 'CallStatement'
@@ -516,6 +525,18 @@
       return array.indexOf(element);
     };
 
+  // From https://github.com/behnammodi/polyfill/blob/master/array.polyfill.js
+
+  var isArray = /* istanbul ignore next */ function (arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+  };
+
+  /* istanbul ignore else */
+  if (Array.isArray)
+    isArray = function (arg) {
+      return Array.isArray(arg);
+    };
+
   // Iterate through an array of objects and return the index of an object
   // with a matching property.
 
@@ -649,7 +670,8 @@
   // If there's no token in the buffer it means we have reached <eof>.
 
   function unexpected(found) {
-    var near = tokenValue(lookahead);
+    var near = 'undefined' !== typeof lookahead ?
+      tokenValue(lookahead) : '<bof>';
     if ('undefined' !== typeof found.type) {
       var type;
       switch (found.type) {
@@ -708,13 +730,30 @@
       scanComment();
       skipWhiteSpace();
     }
-    if (index >= length) return {
-        type : EOF
-      , value: '<eof>'
-      , line: line
-      , lineStart: lineStart
-      , range: [index, index]
-    };
+    if (index >= length) {
+      // From a single line statement, any dangling `isEnd.newLineIsEnd`
+      // makes the EOF a valid 'end' token, but this is not optionnal
+      // and will be an syntax error under certain circumstances.
+      if (isEnd.newLineIsEnd) {
+        if (token && EOF === token.type) {
+          isEnd.newLineIsEnd = false;
+          token = {
+              type: Keyword
+            , value: 'end'
+            , line: line
+            , lineStart: lineStart
+            , range: [tokenStart, index]
+          };
+        }
+      }
+      return {
+          type : EOF
+        , value: '<eof>'
+        , line: line
+        , lineStart: lineStart
+        , range: [index, index]
+      };
+    }
 
     var charCode = input.charCodeAt(index)
       , next = input.charCodeAt(index + 1);
@@ -736,7 +775,7 @@
         if (isDecDigit(next)) return scanNumericLiteral();
         if (46 === next) {
           if (46 === input.charCodeAt(index + 2)) return scanVarargLiteral();
-          return scanPunctuator('..');
+          return scanPunctuatorMaybeAssignmentOperators('..');
         }
         return scanPunctuator('.');
 
@@ -745,22 +784,44 @@
         return scanPunctuator('=');
 
       case 62: // >
-        if (features.bitwiseOperators)
-          if (62 === next) return scanPunctuator('>>');
+        if (features.bitwiseOperators) {
+          if (62 === next) {
+            if (features.bitshiftAdditionalOperators) {
+              if (62 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('>>>');
+              if (60 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('>><');
+            }
+            return scanPunctuatorMaybeAssignmentOperators('>>');
+          }
+        }
         if (61 === next) return scanPunctuator('>=');
         return scanPunctuator('>');
 
       case 60: // <
-        if (features.bitwiseOperators)
-          if (60 === next) return scanPunctuator('<<');
+        if (features.bitwiseOperators) {
+          if (60 === next) {
+            if (features.bitshiftAdditionalOperators)
+              if (62 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('<<>');
+            return scanPunctuatorMaybeAssignmentOperators('<<');
+          }
+        }
         if (61 === next) return scanPunctuator('<=');
         return scanPunctuator('<');
 
       case 126: // ~
         if (61 === next) return scanPunctuator('~=');
-        if (!features.bitwiseOperators)
+        if (!features.bitwiseOperators || features.smileyBitwiseXor)
           break;
         return scanPunctuator('~');
+
+      case 33: // !
+        if (!features.traditionalNotEqual)
+          break;
+        // when traditionalNotEqual is truthy, both syntaxes are accepted:
+        // "!=" token are disguised as "~=" (takes advantage of the fact
+        // that scanPunctuator does not care about what's actually there
+        // and most importantly that they are the same length)
+        if (61 === next) return scanPunctuator('~=');
+        break;
 
       case 58: // :
         if (features.labels)
@@ -776,16 +837,34 @@
         // Check for integer division op (//)
         if (features.integerDivision)
           if (47 === next) return scanPunctuator('//');
-        return scanPunctuator('/');
+        return scanPunctuatorMaybeAssignmentOperators('/');
+
+      case 92: // \
+        if (!features.backslashIntegerDivision)
+          break;
+        return scanPunctuatorMaybeAssignmentOperators('\\');
+
+      case 94: // ^
+        if (features.smileyBitwiseXor)
+          if (94 === next) return scanPunctuatorMaybeAssignmentOperators('^^')
+        return scanPunctuatorMaybeAssignmentOperators('^');
 
       case 38: case 124: // & |
         if (!features.bitwiseOperators)
           break;
+        return scanPunctuatorMaybeAssignmentOperators(input.charAt(index));
 
-        /* fall through */
-      case 42: case 94: case 37: case 44: case 123: case 125:
-      case 93: case 40: case 41: case 59: case 35: case 45:
-      case 43: // * ^ % , { } ] ( ) ; # - +
+      case 64: case 36: // @ $
+        if (!features.peekPokeOperators)
+          break;
+        return scanPunctuator(input.charAt(index));
+
+      case 42: case 37: case 45: case 43: // * % - +
+        return scanPunctuatorMaybeAssignmentOperators(input.charAt(index));
+
+      case 44: case 123: case 125: case 93:
+      case 40: case 41: case 59: case 35:
+      case 63: // , { } ] ( ) ; # ?
         return scanPunctuator(input.charAt(index));
     }
 
@@ -811,6 +890,47 @@
     }
     return false;
   }
+
+  // ... except when it does, see comments above the following functions:
+  //  - skipWhiteSpace
+  //  - isBlockFollow
+  //  - isEnd
+  //
+  // This will deal well enough with any dangling `isEnd.newLineIsEnd`.
+
+  function consumeEnd() {
+    if (isEnd(token)) {
+      if (isEnd.foundEndIsNewLine) {
+        // "consumes" the newline (which sits between the previousToken and current token)
+        isEnd.newLineIsEnd = false;
+        return true;
+      }
+      // Consumes an actual 'end' character sequence
+      return consume('end');
+    }
+    return false;
+  }
+
+  // Lua PICO-8 introduced 3 (janky) whitespace-dependent syntaxes: singleLineIf,
+  // singleLineWhile and singleLinePrint. While they all require an ending newline,
+  // singleLineIf and singleLineWhile may start with any blank character, singleLinePrint
+  // must be on its own line (so starts with a newline sequence).
+  //
+  // singleLineIf and singleLineWhile actually have a more complicated relation with
+  // leading blank character; if the token preceeding the 'if' or 'while' keyword is
+  // a numeral (not just a digit character, hex is fine too) then the blank character
+  // is not necessary (notice how 7 to 10 behave):
+  //
+  //     1 -    a = 0xFFif (a) print(a)
+  //     2 -    a = "42"if (a) print(a)             -- FAIL
+  //     3 -    a = "42" if (a) print(a)
+  //     4 -    a = 0xFF;if (a) print(a)            -- FAIL
+  //     5 -    a = 0xFF; if (a) print(a)
+  //     6 -    a = 0xFF.if (a) print(a)
+  //     7 -    a = 10--[[..]]if (a) print(a)
+  //     8 -    a = ""--[[..]]if (a) print(a)       -- FAIL
+  //     9 -    a = "" --[[..]]if (a) print(a)      -- FAIL
+  //    10 -    a = ""--[[..]] if (a) print(a)
 
   function skipWhiteSpace() {
     while (index < length) {
@@ -869,6 +989,19 @@
       , lineStart: lineStart
       , range: [tokenStart, index]
     };
+  }
+
+  // If the reached punctuator can also be the beginning of an assignment
+  // operators (and if they are enabled in the features) this tests for the
+  // ending '='; if such is found the punctuator is 1 longer, otherwize
+  // defaults to `scanPunctuator()`.
+
+  function scanPunctuatorMaybeAssignmentOperators(valuePunctuator) {
+    if (features.assignmentOperators) {
+      if (61 === input.charCodeAt(index + valuePunctuator.length)) // op=
+        return scanPunctuator(valuePunctuator + '=');
+    }
+    return scanPunctuator(valuePunctuator);
   }
 
   // A vararg literal consists of three dots.
@@ -962,7 +1095,8 @@
     var character = input.charAt(index)
       , next = input.charAt(index + 1);
 
-    var literal = ('0' === character && 'xX'.indexOf(next || null) >= 0) ?
+    var literal = (features.binLiteral && '0' === character && 'bB'.indexOf(next || null) >= 0) ?
+      readBinLiteral() : ('0' === character && 'xX'.indexOf(next || null) >= 0) ?
       readHexLiteral() : readDecLiteral();
 
     var foundImaginaryUnit = readImaginaryUnitSuffix()
@@ -1046,12 +1180,15 @@
     digitStart = index += 2; // Skip 0x part
 
     // A minimum of one hex digit is required.
-    if (!isHexDigit(input.charCodeAt(index)))
+    // "0x.A" is valid from Lua 5.2 onward
+    if (features.noTrailingDotInHexNumeral && !isHexDigit(input.charCodeAt(index)))
       raise(null, errors.malformedNumber, input.slice(tokenStart, index));
 
     while (isHexDigit(input.charCodeAt(index))) ++index;
     // Convert the hexadecimal digit to base 10.
-    digit = parseInt(input.slice(digitStart, index), 16);
+    if (digitStart < index)
+      digit = parseInt(input.slice(digitStart, index), 16);
+    else digit = 0; // No decimal part.
 
     // Fraction part is optional.
     var foundFraction = false;
@@ -1069,8 +1206,11 @@
     }
 
     // Binary exponents are optional
+    //
+    // Things like "a = 0x1p = 16" are valid in Lua PICO-8 in which case this just return normally
+    // (yes it assumes noExponentLiteral implies this behavior above...)
     var foundBinaryExponent = false;
-    if ('pP'.indexOf(input.charAt(index) || null) >= 0) {
+    if (!features.noExponentLiteral && 'pP'.indexOf(input.charAt(index) || null) >= 0) {
       foundBinaryExponent = true;
       ++index;
 
@@ -1091,9 +1231,60 @@
       binaryExponent = Math.pow(2, binaryExponent * binarySign);
     }
 
+    // Cannot be empty
+    if (digitStart === index) raise(token, errors.expected, 'number', tokenValue(token));
+
     return {
       value: (digit + fraction) * binaryExponent,
-      hasFractionPart: foundFraction || foundBinaryExponent
+      hasFractionPart: foundFraction || foundBinaryExponent,
+      hasExponentPart: foundBinaryExponent
+    };
+  }
+
+  // PICO-8 binaries acts similarly to hexadecimals (optional fraction part).
+  // Because this is only used by PICO-8 which does not support number suffixes,
+  // this is a simplified algorithm (eg. no BinaryExp, assumes !noTrailingDotInBinNumeral..).
+  //
+  //     Digit := toDec(digit)
+  //     Fraction := toDec(fraction) / 2 ^ fractionCount
+  //     Number := Digit + Fraction
+
+  function readBinLiteral() {
+    var fraction = 0 // defaults to 0 as it gets summed
+      , digit, fractionStart, digitStart;
+
+    digitStart = index += 2; // Skip 0b part
+
+    while (isBinDigit(input.charCodeAt(index))) ++index;
+    // Convert the hexadecimal digit to base 10.
+    if (digitStart < index)
+      digit = parseInt(input.slice(digitStart, index), 2);
+    else digit = 0; // No decimal part.
+
+    // Fraction part is optional.
+    var foundFraction = false;
+    if ('.' === input.charAt(index)) {
+      foundFraction = true;
+      fractionStart = ++index;
+
+      while (isBinDigit(input.charCodeAt(index))) ++index;
+      fraction = input.slice(fractionStart, index);
+
+      // Empty fraction parts should default to 0, others should be converted
+      // 0.x form so we can use summation at the end.
+      fraction = (fractionStart === index) ? 0
+        : parseInt(fraction, 2) / Math.pow(2, index - fractionStart);
+    }
+
+    // No binary exponents.
+
+    // Cannot be empty
+    if (digitStart === index) raise(token, errors.expected, 'number', tokenValue(token));
+
+    return {
+      value: digit + fraction,
+      hasFractionPart: foundFraction,
+      hasExponentPart: false
     };
   }
 
@@ -1113,8 +1304,11 @@
     }
 
     // Exponent part is optional.
+    //
+    // Things like "a = 1e = 5" are valid in Lua PICO-8 in which case this just return normally
+    // (yes it assumes noExponentLiteral implies this behavior above...)
     var foundExponent = false;
-    if ('eE'.indexOf(input.charAt(index) || null) >= 0) {
+    if (!features.noExponentLiteral && 'eE'.indexOf(input.charAt(index) || null) >= 0) {
       foundExponent = true;
       ++index;
       // Sign part is optional.
@@ -1128,7 +1322,8 @@
 
     return {
       value: parseFloat(input.slice(tokenStart, index)),
-      hasFractionPart: foundFraction || foundExponent
+      hasFractionPart: foundFraction || foundExponent,
+      hasExponentPart: foundExponent
     };
   }
 
@@ -1169,8 +1364,9 @@
 
   // Translate escape sequences to the actual characters.
   function readEscapeSequence() {
-    var sequenceStart = index;
-    switch (input.charAt(index)) {
+    var sequenceStart = index
+      , escapedChar = input.charAt(index);
+    switch (escapedChar) {
       // Lua allow the following escape sequences.
       case 'a': ++index; return '\x07';
       case 'n': ++index; return '\n';
@@ -1227,6 +1423,85 @@
 
       case '\\': case '"': case "'":
         return input.charAt(index++);
+    }
+    if (features.p8scii) {
+      // Some escape sequences might be wrongly parsed/modified/replaced
+      // be it here or in the switch above (maybe)
+
+      var p0 = index+1 < length ? input.charAt(++index) : null
+        , p1 = index+1 < length ? input.charAt(++index) : null
+        , p0CharCode = null === p0 ? -1 : p0.charCodeAt(0)
+        , p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
+
+      switch (escapedChar) {
+        case '*': // Repeat next character P0 times. ?"\*3a" --> aaa
+          // This escape sequence needs something after P0 (maybe) (but what?)
+          if ('"' === p0 || -1 === p1CharCode || isLineTerminator(p1CharCode))
+            if (features.strictEscapes)
+              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+        case '+': // Shift cursor by P0-16, P1-16 pixels
+          if ('+' === escapedChar) {
+            // Valid parameter should be a number or lower case character (maybe)
+            if (p1CharCode < 48 || 57 < p1CharCode && p1CharCode < 97 || 122 < p1CharCode) {
+              if (features.strictEscapes)
+                raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+            }
+          }
+        case '-': // Shift cursor horizontally by P0-16 pixels
+        case '|': // Shift cursor vertically by P0-16 pixels
+        case '#': // Draw solid background with colour P0
+          // Valid parameter should be a number or lower case character (maybe)
+          if (p0CharCode < 48 || 57 < p0CharCode && p0CharCode < 97 || 122 < p0CharCode) {
+            if (features.strictEscapes)
+              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+          }
+
+          if (-1 !== p1CharCode) return '\\' + escapedChar + p0 + p1
+          if (-1 !== p0CharCode) return '\\' + escapedChar + p0;
+          return '\\' + escapedChar;
+
+        case '^': // Special command
+          // Special commands param are shifter by 1 (because of the command itself)
+          if (-1 === p0CharCode || '"' === p0) {
+            if (features.strictEscapes)
+              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+          }
+          index = sequenceStart + 1;
+          var command = input.charAt(index);
+          p0 = index+1 < length ? input.charAt(++index) : null
+          p1 = index+1 < length ? input.charAt(++index) : null
+          p0CharCode = null === p0 ? -1 : p0.charCodeAt(0)
+          p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
+          // 1..9  -- Skip 1,2,4,8,16,32..256 frames
+          // c -- Cls to colour P0, set cursor to 0,0
+          // g -- Set cursor position to home
+          // h -- Set home to cursor position
+          // j -- Jump to absolute P0*4, P1*4 (in screen pixels)
+          // s -- Set tab stop width to P0 pixels (used by "\t")
+          // x -- Set character width  (default: 4)
+          // y -- Set character height (default: 6)
+          if ("123456789cghjsxy".indexOf(command) >= 0) {
+            var param = "";
+            // Check parameter for some commands;
+            // Valid parameter should be a number or lower case character (maybe)
+            if ('c' === command || 'j' === command || 's' === command) {
+              if (p0CharCode < 48 || 57 < p0CharCode && p0CharCode < 97 || 122 < p0CharCode) {
+                if (features.strictEscapes)
+                  raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+              }
+              param += p0;
+              if ('j' === command) {
+                if (p1CharCode < 48 || 57 < p1CharCode && p1CharCode < 97 || 122 < p1CharCode) {
+                  if (features.strictEscapes)
+                    raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+                }
+                param += p1;
+              }
+            } else index--;
+
+            return '\\^' + command + param;
+          }
+      }
     }
 
     if (features.strictEscapes)
@@ -1387,6 +1662,10 @@
     return (charCode >= 48 && charCode <= 57) || (charCode >= 97 && charCode <= 102) || (charCode >= 65 && charCode <= 70);
   }
 
+  function isBinDigit(charCode) {
+    return 48 === charCode || 49 === charCode
+  }
+
   // From [Lua 5.2](http://www.lua.org/manual/5.2/manual.html#8.1) onwards
   // identifiers cannot use 'locale-dependent' letters (i.e. dependent on the C locale).
   // On the other hand, LuaJIT allows arbitrary octets ≥ 128 in identifiers.
@@ -1434,24 +1713,108 @@
   }
 
   function isUnary(token) {
-    if (Punctuator === token.type) return '#-~'.indexOf(token.value) >= 0;
+    if (Punctuator === token.type) {
+      if (features.peekPokeOperators) return '#-~@%$'.indexOf(token.value) >= 0;
+      return '#-~'.indexOf(token.value) >= 0;
+    }
     if (Keyword === token.type) return 'not' === token.value;
     return false;
   }
 
+  // Check if the punctuator is a valid assignment operator.
+  // (eg. excludes '<=', '>=')
+  //
+  // No, this is not quite optimized as would only get called every so ofter
+  // and will most of the time hit for '<=', '>=' as returning false and
+  // potentially some '+=', '-=', .. (the first list) as returning true
+
+  function isAssignmentOperator(token) {
+    if (1 === token.value.length) return false;
+
+    if (Punctuator === token.type && '=' === token.value.charAt(token.value.length-1)) {
+      // Most common
+      if ('<=' === token.value || '>=' === token.value) return false;
+      // Feature independants
+      if (indexOf(['+=', '-=', '*=', '/=', '%=', '^=', '..='], token.value) >= 0) return true;
+      // Least common
+      return indexOf([
+        features.backslashIntegerDivision && '\\=',
+        features.bitwiseOperators && '|=',
+        features.bitwiseOperators && '&=',
+        features.bitwiseOperators && '<<=',
+        features.bitwiseOperators && '>>=',
+        features.bitshiftAdditionalOperators && '>>>=',
+        features.bitshiftAdditionalOperators && '<<>=',
+        features.bitshiftAdditionalOperators && '>><=',
+        features.smileyBitwiseXor && '^^='
+      ], token.value) >= 0;
+    }
+    return false;
+  }
+
   // Check if the token syntactically closes a block.
+  //
+  // When the block (or one of its parent) is from a single line
+  // 'if's or 'while's, and no new line has been reached yet, then
+  // a new line (or EOF) is essentially a 'end' token.
 
   function isBlockFollow(token) {
     if (EOF === token.type) return true;
-    if (Keyword !== token.type) return false;
+    // Sadly with the singleLine syntax, an Identifier token may by
+    // right after a newline character that should count as a 'end'
+    //if (Keyword !== token.type) return false;
     switch (token.value) {
-      case 'else': case 'elseif':
-      case 'end': case 'until':
+      case 'else': case 'elseif': case 'until':
         return true;
       default:
-        return false;
+        return isEnd(token);
     }
   }
+
+  // Complementing the comment above the `isBlockFollow()` function,
+  // `expect('end')` should never be called as is because under some
+  // conditions a '<EOL>' is considered as a valid 'end' token
+  // (despite not beeing one initially).
+  //
+  // Prefer using something along
+  //    if (!consumeEnd()) expect('end');
+
+  function isEnd(token) {
+    isEnd.foundEndIsNewLine = false;
+    if (true === isEnd.newLineIsEnd) {
+      // If previousToken is not on the same line as the current token,
+      // there is a newline sequence in between (and there can't be a token
+      // between the 2).
+      if (EOF === token.type || previousToken && token.line !== previousToken.line) {
+        // In that case, this test is enough to say that a valid 'end' "token"
+        // was found (and passed! the `isEnd.foundEndIsNewLine` flag is set
+        // not to discard the current token)
+        isEnd.foundEndIsNewLine = true;
+        return true;
+      }
+    }
+    if ('end' === token.value) return true;
+
+    return false;
+  }
+
+  // No much clue where to put this, so it will lie as
+  // property to the related function so it is at least
+  // ease to see what it's meaning.
+
+  // This first flag is set when a potential single line statement
+  // is encountered and trigger the `isEnd()` and `consumeEnd()`
+  // function to consider a newline character as a valid 'end' token.
+
+  isEnd.newLineIsEnd = false;
+
+  // This flag is used in `consumeEnd()` to assess whether
+  // the found 'end' token was actually a newline character
+  // (in which case, reset `isEnd.newLineIsEnd`, any next newline
+  // character should not be counted as 'end' token until told
+  // otherwise)
+
+  isEnd.foundEndIsNewLine = false;
 
   // Scope
   // -----
@@ -1802,30 +2165,36 @@
 
     flowContext.raiseDeferredErrors();
 
+    // XXX: can't find any "good" way of doing it so this will have to;
+    // due to the note above `skipWhiteSpace()`, the if and while handlers
+    // need to be aware of the leading token and the leading character
+    // (prior to the 'if' or 'while' itself)
+    //
+    // The taken approach is to not `next()` before calling any handler
+    // (after all, the 'local' is part of the LocalStatment and so on...)
+
     if (Keyword === token.type) {
       switch (token.value) {
-        case 'local':    next(); return parseLocalStatement(flowContext);
-        case 'if':       next(); return parseIfStatement(flowContext);
-        case 'return':   next(); return parseReturnStatement(flowContext);
-        case 'function': next();
+        case 'local':    return parseLocalStatement(flowContext);
+        case 'if':       return parseIfStatement(flowContext);
+        case 'return':   return parseReturnStatement(flowContext);
+        case 'function':
+          next();
           var name = parseFunctionName();
           return parseFunctionDeclaration(name);
-        case 'while':    next(); return parseWhileStatement(flowContext);
-        case 'for':      next(); return parseForStatement(flowContext);
-        case 'repeat':   next(); return parseRepeatStatement(flowContext);
-        case 'break':    next();
-          if (!flowContext.isInLoop())
-            raise(token, errors.noLoopToBreak, token.value);
-          return parseBreakStatement();
-        case 'do':       next(); return parseDoStatement(flowContext);
-        case 'goto':     next(); return parseGotoStatement(flowContext);
+        case 'while':    return parseWhileStatement(flowContext);
+        case 'for':      return parseForStatement(flowContext);
+        case 'repeat':   return parseRepeatStatement(flowContext);
+        case 'break':    return parseBreakStatement(flowContext);
+        case 'do':       return parseDoStatement(flowContext);
+        case 'goto':     return parseGotoStatement(flowContext);
       }
     }
 
     if (features.contextualGoto &&
         token.type === Identifier && token.value === 'goto' &&
         lookahead.type === Identifier && lookahead.value !== 'goto') {
-      next(); return parseGotoStatement(flowContext);
+      return parseGotoStatement(flowContext);
     }
 
     // Assignments memorizes the location and pushes it manually for wrapper nodes.
@@ -1853,9 +2222,12 @@
     return finishNode(ast.labelStatement(label));
   }
 
-  //     break ::= 'break'
+  //     break ::= 'break' [';']
 
-  function parseBreakStatement() {
+  function parseBreakStatement(flowContext) {
+    expect('break');
+    if (!flowContext.isInLoop())
+      raise(token, errors.noLoopToBreak, token.value);
     consume(';');
     return finishNode(ast.breakStatement());
   }
@@ -1863,6 +2235,8 @@
   //     goto ::= 'goto' Name
 
   function parseGotoStatement(flowContext) {
+    expect('goto');
+
     var name = token.value
       , gotoToken = previousToken
       , label = parseIdentifier();
@@ -1874,32 +2248,78 @@
   //     do ::= 'do' block 'end'
 
   function parseDoStatement(flowContext) {
+    expect('do');
+
     if (options.scope) createScope();
     flowContext.pushScope();
     var body = parseBlock(flowContext);
     flowContext.popScope();
     if (options.scope) destroyScope();
-    expect('end');
+
+    if (!consumeEnd()) expect('end');
     return finishNode(ast.doStatement(body));
   }
 
   //     while ::= 'while' exp 'do' block 'end'
 
   function parseWhileStatement(flowContext) {
+    var canBeSingleLineWhile = features.singleLineWhile
+      , mustBeSingleLineWhile = false;
+
+    // Here it _can_ if either:
+    //  - no dangling `newLineIsEnd` (not within a single line statement)
+    //  - no previous token
+    //  - previous token is numeral
+    //  - no character before statement
+    //  - character before statement is whitespace or lineterminator
+    if (canBeSingleLineWhile /*&& true !== newLineIsEnd*/) {
+      var startIndex = token.range[0];
+      canBeSingleLineWhile = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
+      // If the previous token is not a numeral (or beginning of stream), scan backward
+      // 1 character expecting a blank character (whitespace or lineterminator)
+      if (!canBeSingleLineWhile) {
+        var previousCharCode = input.charCodeAt(startIndex-1);
+        canBeSingleLineWhile = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
+      }
+    }
+
+    expect('while');
+
+    // Here it _can_ if: - the condition is in parentheses
+    if (canBeSingleLineWhile)
+      canBeSingleLineWhile = consume('(');
     var condition = parseExpectedExpression(flowContext);
-    expect('do');
+    if (canBeSingleLineWhile) {
+      expect(')');
+      // Here it **must** if: - no 'do' token were found past the condition
+      mustBeSingleLineWhile = !consume('do');
+    } else expect('do');
+
+    // No 'do' were found: the scope of the 'while' is implicitly opened
+    // and the very next EOL is syntaxically equivalent to a 'end'
+    if (mustBeSingleLineWhile) isEnd.newLineIsEnd = true;
+
     if (options.scope) createScope();
     flowContext.pushScope(true);
     var body = parseBlock(flowContext);
     flowContext.popScope();
     if (options.scope) destroyScope();
-    expect('end');
+
+    // Single line 'while' cannot be empty.
+    if (mustBeSingleLineWhile) {
+      if (0 === body.length)
+        return raise(token, errors.expected, '<body>', tokenValue(token));
+    }
+
+    if (!consumeEnd()) expect('end');
     return finishNode(ast.whileStatement(condition, body));
   }
 
   //     repeat ::= 'repeat' block 'until' exp
 
   function parseRepeatStatement(flowContext) {
+    expect('repeat');
+
     if (options.scope) createScope();
     flowContext.pushScope(true);
     var body = parseBlock(flowContext);
@@ -1914,6 +2334,8 @@
   //     retstat ::= 'return' [exp {',' exp}] [';']
 
   function parseReturnStatement(flowContext) {
+    expect('return');
+
     var expressions = [];
 
     if ('end' !== token.value) {
@@ -1932,6 +2354,28 @@
   //     elif ::= 'elseif' exp 'then' block
 
   function parseIfStatement(flowContext) {
+    var canBeSingleLineIf = features.singleLineIf
+      , mustBeSingleLineIf = false;
+
+    // Here it _can_ if either:
+    //  - no dangling `newLineIsEnd` (not within a single line statement)
+    //  - no previous token
+    //  - previous token is numeral
+    //  - no character before statement
+    //  - character before statement is whitespace or lineterminator
+    if (canBeSingleLineIf /*&& true !== newLineIsEnd*/) {
+      var startIndex = token.range[0];
+      canBeSingleLineIf = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
+      // If the previous token is not a numeral (or beginning of stream), scan backward
+      // 1 character expecting a blank character (whitespace or lineterminator)
+      if (!canBeSingleLineIf) {
+        var previousCharCode = input.charCodeAt(startIndex-1);
+        canBeSingleLineIf = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
+      }
+    }
+
+    expect('if');
+
     var clauses = []
       , condition
       , body
@@ -1943,14 +2387,32 @@
       marker = locations[locations.length - 1];
       locations.push(marker);
     }
+
+    // Here it _can_ if: - the condition is in parentheses
+    if (canBeSingleLineIf)
+      canBeSingleLineIf = consume('(');
     condition = parseExpectedExpression(flowContext);
-    expect('then');
+    if (canBeSingleLineIf) {
+      expect(')');
+      // Here it **must** if: - no 'then' token were found past the condition
+      mustBeSingleLineIf = !consume('then');
+    } else expect('then');
+
+    // No 'then' were found: the scope of the 'if' is implicitly opened
+    // and the very next EOL is syntaxically equivalent to a 'end'
+    if (mustBeSingleLineIf) isEnd.newLineIsEnd = true;
+
     if (options.scope) createScope();
     flowContext.pushScope();
     body = parseBlock(flowContext);
     flowContext.popScope();
     if (options.scope) destroyScope();
     clauses.push(finishNode(ast.ifClause(condition, body)));
+
+    // Single line 'if' does not accept 'elseif' clause.
+    if (mustBeSingleLineIf)
+      if ('elseif' === token.value) unexpected('elseif');
+      // (`consume('elseif')` would make an erroneous error message)
 
     if (trackLocations) marker = createLocationMarker();
     while (consume('elseif')) {
@@ -1980,18 +2442,29 @@
       clauses.push(finishNode(ast.elseClause(body)));
     }
 
-    expect('end');
+    // Single line 'if' cannot be empty.
+    if (mustBeSingleLineIf) {
+      // But:
+      //    - if an 'else' clause is present, then it is ok (even if both are empty)
+      //    - if the 'if' clause is closed by a proper 'end', then it may be empty
+      if (0 === clauses[0].body.length && 1 === clauses.length && 'end' !== token.value)
+        return raise(token, errors.expected, '<body>', tokenValue(token));
+    }
+
+    if (!consumeEnd()) expect('end');
     return finishNode(ast.ifStatement(clauses));
   }
 
   // There are two types of for statements, generic and numeric.
   //
-  //     for ::= Name '=' exp ',' exp [',' exp] 'do' block 'end'
-  //     for ::= namelist 'in' explist 'do' block 'end'
+  //     for ::= 'for' Name '=' exp ',' exp [',' exp] 'do' block 'end'
+  //     for ::= 'for' namelist 'in' explist 'do' block 'end'
   //     namelist ::= Name {',' Name}
   //     explist ::= exp {',' exp}
 
   function parseForStatement(flowContext) {
+    expect('for');
+
     var variable = parseIdentifier()
       , body;
 
@@ -2017,7 +2490,7 @@
       flowContext.pushScope(true);
       body = parseBlock(flowContext);
       flowContext.popScope();
-      expect('end');
+      if (!consumeEnd()) expect('end');
       if (options.scope) destroyScope();
 
       return finishNode(ast.forNumericStatement(variable, start, end, step, body));
@@ -2045,7 +2518,7 @@
       flowContext.pushScope(true);
       body = parseBlock(flowContext);
       flowContext.popScope();
-      expect('end');
+      if (!consumeEnd()) expect('end');
       if (options.scope) destroyScope();
 
       return finishNode(ast.forGenericStatement(variables, iterators, body));
@@ -2063,6 +2536,8 @@
   //        | 'local' Name {',' Name} ['=' exp {',' exp}]
 
   function parseLocalStatement(flowContext) {
+    expect('local');
+
     var name
       , declToken = previousToken;
 
@@ -2144,6 +2619,31 @@
         base = parseExpectedExpression(flowContext);
         expect(')');
         lvalue = false;
+      } else if (features.singleLinePrint && '?' === token.value) {
+        var theSingleLine = token.line
+          , previousTokenLine = previousToken ? previousToken.line : -1;
+        next();
+        pushLocation(marker);
+
+        // Must be not on the same line as previous (if any)
+        if (theSingleLine === previousTokenLine) unexpected(token);
+
+        // Next should be a valid explist (or nothing) all on the same line
+        var expressions = [];
+        var expression = parseExpression(flowContext);
+        if (previousToken.line !== theSingleLine) unexpected('?');
+        if (null != expression) expressions.push(expression);
+        while (consume(',')) {
+          expression = parseExpectedExpression(flowContext);
+          if (previousToken.line !== theSingleLine) unexpected('?');
+          expressions.push(expression);
+        }
+
+        // After what, must not be on the same line as next
+        if (theSingleLine === token.line && EOF !== token.type) unexpected('?');
+
+        var base = { type: Identifier, name: '?' };
+        return finishNode(ast.callExpression(base, expressions));
       } else {
         return unexpected(token);
       }
@@ -2188,7 +2688,14 @@
       return unexpected(token);
     }
 
-    expect('=');
+    var assignmentOperator = false;
+
+    // Try to find the operator if this is realy an assignment operator statement
+    // XXX: not sure this should be done like this...
+    if (features.assignmentOperators && isAssignmentOperator(token)) {
+      assignmentOperator = token.value.slice(0, token.value.length-1);
+      next();
+    } else expect('=');
 
     var values = [];
 
@@ -2197,7 +2704,10 @@
     } while (consume(','));
 
     pushLocation(startMarker);
-    return finishNode(ast.assignmentStatement(targets, values));
+    var assignmentNode = assignmentOperator ?
+      ast.assignmentOperatorStatement(assignmentOperator, targets, values)
+      : ast.assignmentStatement(targets, values);
+    return finishNode(assignmentNode);
   }
 
   // ### Non-statements
@@ -2257,7 +2767,7 @@
 
     var body = parseBlock(flowContext);
     flowContext.popScope();
-    expect('end');
+    if (!consumeEnd()) expect('end');
     if (options.scope) destroyScope();
 
     isLocal = isLocal || false;
@@ -2384,10 +2894,11 @@
     if (1 === length) {
       switch (charCode) {
         case 94: return 12; // ^
+        case 92: return 10; // \
         case 42: case 47: case 37: return 10; // * / %
         case 43: case 45: return 9; // + -
         case 38: return 6; // &
-        case 126: return 5; // ~
+        case 126: if (!features.smileyBitwiseXor) return 5; // ~
         case 124: return 4; // |
         case 60: case 62: return 3; // < >
       }
@@ -2396,11 +2907,16 @@
         case 47: return 10; // //
         case 46: return 8; // ..
         case 60: case 62:
-            if('<<' === operator || '>>' === operator) return 7; // << >>
+            if ('<<' === operator || '>>' === operator) return 7; // << >>
             return 3; // <= >=
+        case 94:
+            if ('^^' === operator) return 12; // ^^
         case 61: case 126: return 3; // == ~=
         case 111: return 1; // or
-      }
+      }       // Other 3-length token that can get here: 'end', 'and'
+    } else if (3 === length && (60 === charCode || 62 === charCode)) {
+      // The only operators that can make it here are '>>>', '<<>' and '>><'
+      return 7
     } else if (97 === charCode && 'and' === operator) return 2;
     return 0;
   }
@@ -2629,6 +3145,9 @@
 
   var versionFeatures = {
     '5.1': {
+      // Lua supports trailing "." in hex numarals from 5.2 onward; this "feature" keep
+      // from parsing that as correct for Lua 5.1
+      noTrailingDotInHexNumeral: true
     },
     '5.2': {
       labels: true,
@@ -2661,8 +3180,111 @@
       unicodeEscapes: true,
       imaginaryNumbers: true,
       integerSuffixes: true
+    },
+    // NOTE: p8 file format layout (not the png.p8 but the text p8)
+    'PICO-8': {
+      p8FileHeader: true, // no shebang but a 2 lines header (giving a version num)
+      p8SectionLua: '__lua__',
+      p8SectionGfx: '__gfx__',
+      p8SectionGff: '__gff__',
+      p8SectionLabel: '__label__',
+      p8SectionMap: '__map__',
+      p8SectionSfx: '__sfx__',
+      p8SectionMusic: '__music__',
+    },
+    // NOTE: first implemented version (some features may have existed before 0.2.1)
+    'PICO-8-0.2.1': {
+      _inherits: ['5.2', 'PICO-8'],
+      integerSuffixes: false,
+      imaginaryNumbers: false,
+      bitwiseOperators: true,
+      integerDivision: false,
+      // Below rules were added for PICO-8
+      // XXX: (move to appropriate doc please)
+      // The added syntax for singleLine[..] is pretty broken, see the test
+      // for some kind of overview (./test/scaffolding/conditional)
+      //
+      // With singleLineIf, the following becomes valid (note the 'do'):
+      //    if ::= 'if' '(' exp ')' 'do' block {elif} ['else' block] 'end'
+      // This code has an error (missing space after "name()"):
+      //    ```
+      //    function name()if (exp) block
+      //      block
+      //    end
+      //    ```
+      // This code prints "no":
+      //    ```
+      //    if (1) do local a = "yes"
+      //      print(a or "no")
+      //    end
+      //    ```
+      // And this code too:
+      //    ```
+      //    if (nil) else do local a = "yes"
+      //      print(a or "no")
+      //    end
+      //    ```
+      // So the actual added syntax is closer to:
+      //    if ::= '\s' 'if' '(' exp ')'
+      //          [ block [ 'else' [ 'do' block_else_do '\n' ]
+      //                    block_else_then
+      //                  ] '\n'
+      //          | [ 'do' block_if_do '\n'
+      //            | 'then'
+      //            ] block_if_then {elif} ['else' block] 'end'
+      //          ]
+      // ... where `block_if_do` has for parent `block_if_then`
+      // and `block_else_do` has for parent `block_else_then`
+      //
+      // singleLineIf and singleLineWhile cannot be empty
+      // `if (1)` error, `if (1) else` no error, `if (1) end do` no error (closing with a proper 'end')
+      // `while (1)` error
+      binLiteral: true,           // eg. 0b101010
+      noExponentLiteral: true,    // eg. 1e-1
+      singleLineIf: true,         // if ::= 'if' '(' exp ')' block ['else' block] '\n'
+      singleLineWhile: true,      // while ::= 'while' '(' exp ')' block '\n'
+      singleLinePrint: true,      // slprint ::= '\n' '?' [explist] '\n'   the result is a CallStatement node
+      assignmentOperators: true,  // a += b
+      traditionalNotEqual: true,  // a != b
+      bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
+      peekPokeOperators: true,    // @a   %a   $a
+      backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above), same about assignment operators)
+      smileyBitwiseXor: true      // a ^^ b (also disables a ~ b ie. **makes it invalid** (maybe), same about assignment operators)
+    },
+    // NOTE: untested
+    'PICO-8-0.2.2': {
+      _inherits: ['PICO-8-0.2.1'],
+      p8scii: true     // additional string escape sequences
     }
   };
+
+  // Expand the '_inherits' of each version (recursively).
+
+  function expandInherted(_versionId) {
+    if ('undefined' !== typeof _versionId) {
+      let features = versionFeatures[_versionId];
+
+      if (Object.hasOwnProperty.call(features, '_inherits') && isArray(features._inherits)) {
+        for (let k = 0; k < features._inherits.length; k++) {
+          const inherited = expandInherted(features._inherits[k]);
+          // Entries in "features" (child) will override inherited ones (that are in "inherited")
+          features = assign({}, inherited, features);
+        }
+
+        features._inherits = [];
+      }
+
+      return features
+    }
+
+    // No version provided, expand all inplace
+    for (const versionId in versionFeatures)
+      if (Object.hasOwnProperty.call(versionFeatures, versionId))
+        versionFeatures[versionId] = expandInherted(versionId);
+  }
+
+  expandInherted()
+  exports.versionFeatures = versionFeatures;
 
   function parse(_input, _options) {
     if ('undefined' === typeof _options && 'object' === typeof _input) {
@@ -2679,6 +3301,15 @@
     line = 1;
     lineStart = 0;
     length = input.length;
+    // _Actually_ rewind the lexer thanks
+    previousToken = undefined;
+    token = undefined;
+    lookahead = undefined;
+    comments = undefined;
+    tokenStart = undefined;
+    // Please just rewind the lexer properly
+    isEnd.newLineIsEnd = false;
+    isEnd.foundEndIsNewLine = false;
     // When tracking identifier scope, initialize with an empty scope.
     scopes = [[]];
     scopeDepth = 0;
