@@ -181,7 +181,7 @@ args.forEach(function(arg, index) {
       .split("\n")
       .forEach(function(snippet) {
         if (!snippet.length) return;
-        snippets.push(snippet.replace(/\n$/, ''));
+        snippets.push(snippet.replace("\r", ''));
       });
   }
   return;

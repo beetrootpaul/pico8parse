@@ -2390,6 +2390,3259 @@
         "scope": true,
         "luaVersion": "5.3"
       }
+    },
+    {
+      "source": "",
+      "result": {
+        "type": "Chunk",
+        "body": [],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 0
+          }
+        },
+        "range": [
+          0,
+          0
+        ],
+        "comments": [],
+        "globals": []
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
+      "source": "a = \"\\#c\\f5 blue \"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\#c\\f5 blue \"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 18
+                  }
+                },
+                "range": [
+                  4,
+                  18
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 18
+              }
+            },
+            "range": [
+              0,
+              18
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 18
+          }
+        },
+        "range": [
+          0,
+          18
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\0\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\0\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\*\"",
+      "result": "[1:8] invalid escape sequence near '\\*\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\*3a\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\*3a\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "range": [
+                  4,
+                  10
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              0,
+              10
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        },
+        "range": [
+          0,
+          10
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\#\"",
+      "result": "[1:8] invalid escape sequence near '\\#\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\#4\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\#4\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\-\"",
+      "result": "[1:8] invalid escape sequence near '\\-\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\-2\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\-2\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\|\"",
+      "result": "[1:8] invalid escape sequence near '\\|\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\|2\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\|2\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\+\"",
+      "result": "[1:8] invalid escape sequence near '\\+\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\+2\"",
+      "result": "[1:9] invalid escape sequence near '\\+2\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\+22\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\+22\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "range": [
+                  4,
+                  10
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              0,
+              10
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        },
+        "range": [
+          0,
+          10
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^\"",
+      "result": "[1:8] invalid escape sequence near '\\^\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^\"",
+      "result": "[1:8] invalid escape sequence near '\\^\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^0\"",
+      "result": "[1:9] invalid escape sequence near '\\^0\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^1\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^1\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^9\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^9\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^c\"",
+      "result": "[1:9] invalid escape sequence near '\\^c\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^c2\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^c2\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "range": [
+                  4,
+                  10
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              0,
+              10
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        },
+        "range": [
+          0,
+          10
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^s\"",
+      "result": "[1:9] invalid escape sequence near '\\^s\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^s2\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^s2\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "range": [
+                  4,
+                  10
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              0,
+              10
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        },
+        "range": [
+          0,
+          10
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^j\"",
+      "result": "[1:9] invalid escape sequence near '\\^j\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^j2\"",
+      "result": "[1:10] invalid escape sequence near '\\^j2\"'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^j22\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^j22\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 11
+                  }
+                },
+                "range": [
+                  4,
+                  11
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 11
+              }
+            },
+            "range": [
+              0,
+              11
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 11
+          }
+        },
+        "range": [
+          0,
+          11
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^g\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^g\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^h\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^h\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^x\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^x\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\^y\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\^y\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 9
+                  }
+                },
+                "range": [
+                  4,
+                  9
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            },
+            "range": [
+              0,
+              9
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 9
+          }
+        },
+        "range": [
+          0,
+          9
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\a\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\a\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\b\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\b\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\t\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\t\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\n\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\n\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\v\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\v\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\f\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\f\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\r\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\r\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\014\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\014\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "range": [
+                  4,
+                  10
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              0,
+              10
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        },
+        "range": [
+          0,
+          10
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\015\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\015\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 10
+                  }
+                },
+                "range": [
+                  4,
+                  10
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              0,
+              10
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        },
+        "range": [
+          0,
+          10
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\ace-g\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\ace-g\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 12
+                  }
+                },
+                "range": [
+                  4,
+                  12
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 12
+              }
+            },
+            "range": [
+              0,
+              12
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 12
+          }
+        },
+        "range": [
+          0,
+          12
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\as4x5c1egc2egc3egc4\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\as4x5c1egc2egc3egc4\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 26
+                  }
+                },
+                "range": [
+                  4,
+                  26
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 26
+              }
+            },
+            "range": [
+              0,
+              26
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 26
+          }
+        },
+        "range": [
+          0,
+          26
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
+      "source": "a = \"\\ncafe\\vb,!\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "StringLiteral",
+                "value": null,
+                "raw": "\"\\ncafe\\vb,!\"",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 17
+                  }
+                },
+                "range": [
+                  4,
+                  17
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 17
+              }
+            },
+            "range": [
+              0,
+              17
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 17
+          }
+        },
+        "range": [
+          0,
+          17
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
     }
   ];
 }));

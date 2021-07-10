@@ -735,14 +735,16 @@
       // makes the EOF a valid 'end' token, but this is not optionnal
       // and will be an syntax error under certain circumstances.
       if (isEnd.newLineIsEnd) {
-        isEnd.newLineIsEnd = false;
-        return {
-            type: Keyword
-          , value: 'end'
-          , line: line
-          , lineStart: lineStart
-          , range: [tokenStart, index]
-        };
+        if (EOF === token.type) {
+          isEnd.newLineIsEnd = false;
+          token = {
+              type: Keyword
+            , value: 'end'
+            , line: line
+            , lineStart: lineStart
+            , range: [tokenStart, index]
+          };
+        }
       }
       return {
           type : EOF
@@ -785,8 +787,8 @@
         if (features.bitwiseOperators) {
           if (62 === next) {
             if (features.bitshiftAdditionalOperators) {
-              if (62 === next) return scanPunctuatorMaybeAssignmentOperators('>>>');
-              if (60 === next) return scanPunctuatorMaybeAssignmentOperators('>><');
+              if (62 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('>>>');
+              if (60 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('>><');
             }
             return scanPunctuatorMaybeAssignmentOperators('>>');
           }
@@ -798,7 +800,7 @@
         if (features.bitwiseOperators) {
           if (60 === next) {
             if (features.bitshiftAdditionalOperators)
-              if (62 === next) scanPunctuatorMaybeAssignmentOperators('<<>');
+              if (62 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('<<>');
             return scanPunctuatorMaybeAssignmentOperators('<<');
           }
         }
@@ -1205,7 +1207,7 @@
 
     // Binary exponents are optional
     //
-    // TODO: things like "a = 0x1p = 16" are valid in Lua PICO-8 in which case this just return normally
+    // Things like "a = 0x1p = 16" are valid in Lua PICO-8 in which case this just return normally
     // (yes it assumes noExponentLiteral implies this behavior above...)
     var foundBinaryExponent = false;
     if (!features.noExponentLiteral && 'pP'.indexOf(input.charAt(index) || null) >= 0) {
@@ -1228,6 +1230,9 @@
       // Calculate the binary exponent of the number.
       binaryExponent = Math.pow(2, binaryExponent * binarySign);
     }
+
+    // Cannot be empty
+    if (digitStart === index) raise(token, errors.expected, 'number', tokenValue(token));
 
     return {
       value: (digit + fraction) * binaryExponent,
@@ -1272,6 +1277,9 @@
     }
 
     // No binary exponents.
+
+    // Cannot be empty
+    if (digitStart === index) raise(token, errors.expected, 'number', tokenValue(token));
 
     return {
       value: digit + fraction,
@@ -1356,8 +1364,9 @@
 
   // Translate escape sequences to the actual characters.
   function readEscapeSequence() {
-    var sequenceStart = index;
-    switch (input.charAt(index)) {
+    var sequenceStart = index
+      , escapedChar = input.charAt(index);
+    switch (escapedChar) {
       // Lua allow the following escape sequences.
       case 'a': ++index; return '\x07';
       case 'n': ++index; return '\n';
@@ -1414,6 +1423,85 @@
 
       case '\\': case '"': case "'":
         return input.charAt(index++);
+    }
+    if (features.p8scii) {
+      // Some escape sequences might be wrongly parsed/modified/replaced
+      // be it here or in the switch above (maybe)
+
+      var p0 = index+1 < length ? input.charAt(++index) : null
+        , p1 = index+1 < length ? input.charAt(++index) : null
+        , p0CharCode = null === p0 ? -1 : p0.charCodeAt(0)
+        , p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
+
+      switch (escapedChar) {
+        case '*': // Repeat next character P0 times. ?"\*3a" --> aaa
+          // This escape sequence needs something after P0 (maybe) (but what?)
+          if ('"' === p0 || -1 === p1CharCode || isLineTerminator(p1CharCode))
+            if (features.strictEscapes)
+              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+        case '+': // Shift cursor by P0-16, P1-16 pixels
+          if ('+' === escapedChar) {
+            // Valid parameter should be a number or lower case character (maybe)
+            if (p1CharCode < 48 || 57 < p1CharCode && p1CharCode < 97 || 122 < p1CharCode) {
+              if (features.strictEscapes)
+                raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+            }
+          }
+        case '-': // Shift cursor horizontally by P0-16 pixels
+        case '|': // Shift cursor vertically by P0-16 pixels
+        case '#': // Draw solid background with colour P0
+          // Valid parameter should be a number or lower case character (maybe)
+          if (p0CharCode < 48 || 57 < p0CharCode && p0CharCode < 97 || 122 < p0CharCode) {
+            if (features.strictEscapes)
+              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+          }
+
+          if (-1 !== p1CharCode) return '\\' + escapedChar + p0 + p1
+          if (-1 !== p0CharCode) return '\\' + escapedChar + p0;
+          return '\\' + escapedChar;
+
+        case '^': // Special command
+          // Special commands param are shifter by 1 (because of the command itself)
+          if (-1 === p0CharCode || '"' === p0) {
+            if (features.strictEscapes)
+              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+          }
+          index = sequenceStart + 1;
+          var command = input.charAt(index);
+          p0 = index+1 < length ? input.charAt(++index) : null
+          p1 = index+1 < length ? input.charAt(++index) : null
+          p0CharCode = null === p0 ? -1 : p0.charCodeAt(0)
+          p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
+          // 1..9  -- Skip 1,2,4,8,16,32..256 frames
+          // c -- Cls to colour P0, set cursor to 0,0
+          // g -- Set cursor position to home
+          // h -- Set home to cursor position
+          // j -- Jump to absolute P0*4, P1*4 (in screen pixels)
+          // s -- Set tab stop width to P0 pixels (used by "\t")
+          // x -- Set character width  (default: 4)
+          // y -- Set character height (default: 6)
+          if ("123456789cghjsxy".indexOf(command) >= 0) {
+            var param = "";
+            // Check parameter for some commands;
+            // Valid parameter should be a number or lower case character (maybe)
+            if ('c' === command || 'j' === command || 's' === command) {
+              if (p0CharCode < 48 || 57 < p0CharCode && p0CharCode < 97 || 122 < p0CharCode) {
+                if (features.strictEscapes)
+                  raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+              }
+              param += p0;
+              if ('j' === command) {
+                if (p1CharCode < 48 || 57 < p1CharCode && p1CharCode < 97 || 122 < p1CharCode) {
+                  if (features.strictEscapes)
+                    raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+                }
+                param += p1;
+              }
+            } else index--;
+
+            return '\\^' + command + param;
+          }
+      }
     }
 
     if (features.strictEscapes)
@@ -1697,7 +1785,7 @@
       // If previousToken is not on the same line as the current token,
       // there is a newline sequence in between (and there can't be a token
       // between the 2).
-      if (EOF === token.type || token.line !== previousToken.line) {
+      if (EOF === token.type || previousToken && token.line !== previousToken.line) {
         // In that case, this test is enough to say that a valid 'end' "token"
         // was found (and passed! the `isEnd.foundEndIsNewLine` flag is set
         // not to discard the current token)
@@ -2217,6 +2305,12 @@
     flowContext.popScope();
     if (options.scope) destroyScope();
 
+    // Single line 'while' cannot be empty.
+    if (mustBeSingleLineWhile) {
+      if (0 === body.length)
+        return raise(token, errors.expected, '<body>', tokenValue(token));
+    }
+
     if (!consumeEnd()) expect('end');
     return finishNode(ast.whileStatement(condition, body));
   }
@@ -2346,6 +2440,15 @@
       flowContext.popScope();
       if (options.scope) destroyScope();
       clauses.push(finishNode(ast.elseClause(body)));
+    }
+
+    // Single line 'if' cannot be empty.
+    if (mustBeSingleLineIf) {
+      // But:
+      //    - if an 'else' clause is present, then it is ok (even if both are empty)
+      //    - if the 'if' clause is closed by a proper 'end', then it may be empty
+      if (0 === clauses[0].body.length && 1 === clauses.length && 'end' !== token.value)
+        return raise(token, errors.expected, '<body>', tokenValue(token));
     }
 
     if (!consumeEnd()) expect('end');
@@ -2520,6 +2623,7 @@
         var theSingleLine = token.line
           , previousTokenLine = previousToken ? previousToken.line : -1;
         next();
+        pushLocation(marker);
 
         // Must be not on the same line as previous (if any)
         if (theSingleLine === previousTokenLine) unexpected(token);
@@ -3133,7 +3237,7 @@
       // and `block_else_do` has for parent `block_else_then`
       //
       // singleLineIf and singleLineWhile cannot be empty
-      // `if (1)` error, `if (1) else` no error
+      // `if (1)` error, `if (1) else` no error, `if (1) end do` no error (closing with a proper 'end')
       // `while (1)` error
       binLiteral: true,           // eg. 0b101010
       noExponentLiteral: true,    // eg. 1e-1
@@ -3197,6 +3301,12 @@
     line = 1;
     lineStart = 0;
     length = input.length;
+    // _Actually_ rewind the lexer thanks
+    previousToken = undefined;
+    token = undefined;
+    lookahead = undefined;
+    comments = undefined;
+    tokenStart = undefined;
     // When tracking identifier scope, initialize with an empty scope.
     scopes = [[]];
     scopeDepth = 0;
