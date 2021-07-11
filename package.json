@@ -9,10 +9,11 @@
     "parsing",
     "pico8"
   ],
-  "homepage": "https://fstirlitz.github.io/luaparse/",
+  "homepage": "https://pictelm.github.io/pico8parse/",
   "bugs": "https://github.com/PictElm/pico8parse/issues",
   "license": "MIT",
-  "author": "Oskar Schöldström <public@oxy.fi> (http://www.oxy.fi/)",
+  "originalAuthor": "Oskar Schöldström <public@oxy.fi> (http://www.oxy.fi/)",
+  "author": "Grenier Célestin",
   "files": [
     "README.md",
     "LICENSE",

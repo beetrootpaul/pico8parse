@@ -37,10 +37,8 @@ if (-not $PROCESSOR) { $PROCESSOR = '/opt/v8/tools/linux-tick-processor' }
 $LIB = '.\node_modules'
 $BIN = "$LIB\.bin"
 
-if (-not $Targets -or $Targets -ceq 'all') { $Targets = 'coucou' }
+if (-not $Targets -or $Targets -ceq 'all') { $Targets = 'build' }
 $_targets = @{
-    'coucou' = { Write-Host 'coucou' }
-
     # Main tasks
     # ----------
     'build' = { & $BIN\gulp.ps1 build }
@@ -78,17 +76,30 @@ $_targets = @{
     # -------------
     'docs' = [DependsOn]::new(@('coverage', 'docs-test', 'docs-md'))
     'docs-index' = {
-        Get-Content .\docs\layout\head.html  > .\docs\index.html
-        & .$BIN\marked.ps1 README.md --gfm  >> .\docs\index.html
-        Get-Content .\docs\layout\foot.html >> .\docs\index.html
+        Get-Content .\docs\layout\head.html           > .\docs\index.html
+        & .\$BIN\marked.ps1 README-luaparse.md --gfm >> .\docs\index.html
+        Get-Content .\docs\layout\foot.html          >> .\docs\index.html
     }
-    'docs-md' = { Write-Host 'cant be bothered' }
-    '%.html' = { Write-Host 'cant be bothered' }
+    'docs-md' = [DependsOn]::new(@('docs-index')).Then({
+        Get-Item .\docs\*.md | ForEach-Object {
+            $FILE = $_.BaseName
+            Invoke-Target '%.html'
+        }
+        Get-Content .\docs\layout\head.html  > .\docs\fork.html
+        & .\$BIN\marked.ps1 README.md --gfm >> .\docs\fork.html
+        Get-Content .\docs\layout\foot.html >> .\docs\fork.html
+    })
+    '%.html' = {
+        Get-Content .\docs\layout\head.html        > .\docs\$FILE.html
+        & .\$BIN\marked.ps1 .\docs\$FILE.md --gfm >> .\docs\$FILE.html
+        Get-Content .\docs\layout\foot.html       >> .\docs\$FILE.html
+    }
 
     # Coverage
     # --------
     'coverage' = {
-        Remove-Item -Recurse -Force .\html-report\ .\docs\coverage\
+        Remove-Item -Recurse -Force .\html-report\
+        Remove-Item -Recurse -Force .\docs\coverage\
         & $BIN\nyc.ps1 --reporter=html --report-dir=.\docs\coverage node .\test\runner.js --console | Out-Null
     }
 

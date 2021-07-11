@@ -846,7 +846,7 @@
 
       case 94: // ^
         if (features.smileyBitwiseXor)
-          if (94 === next) return scanPunctuatorMaybeAssignmentOperators('^^')
+          if (94 === next) return scanPunctuatorMaybeAssignmentOperators('^^');
         return scanPunctuatorMaybeAssignmentOperators('^');
 
       case 38: case 124: // & |
@@ -1439,6 +1439,7 @@
           if ('"' === p0 || -1 === p1CharCode || isLineTerminator(p1CharCode))
             if (features.strictEscapes)
               raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
+          /* fall through */
         case '+': // Shift cursor by P0-16, P1-16 pixels
           if ('+' === escapedChar) {
             // Valid parameter should be a number or lower case character (maybe)
@@ -1447,6 +1448,7 @@
                 raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
             }
           }
+          /* fall through */
         case '-': // Shift cursor horizontally by P0-16 pixels
         case '|': // Shift cursor vertically by P0-16 pixels
         case '#': // Draw solid background with colour P0
@@ -1456,7 +1458,7 @@
               raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
           }
 
-          if (-1 !== p1CharCode) return '\\' + escapedChar + p0 + p1
+          if (-1 !== p1CharCode) return '\\' + escapedChar + p0 + p1;
           if (-1 !== p0CharCode) return '\\' + escapedChar + p0;
           return '\\' + escapedChar;
 
@@ -1468,9 +1470,9 @@
           }
           index = sequenceStart + 1;
           var command = input.charAt(index);
-          p0 = index+1 < length ? input.charAt(++index) : null
-          p1 = index+1 < length ? input.charAt(++index) : null
-          p0CharCode = null === p0 ? -1 : p0.charCodeAt(0)
+          p0 = index+1 < length ? input.charAt(++index) : null;
+          p1 = index+1 < length ? input.charAt(++index) : null;
+          p0CharCode = null === p0 ? -1 : p0.charCodeAt(0);
           p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
           // 1..9  -- Skip 1,2,4,8,16,32..256 frames
           // c -- Cls to colour P0, set cursor to 0,0
@@ -1663,7 +1665,7 @@
   }
 
   function isBinDigit(charCode) {
-    return 48 === charCode || 49 === charCode
+    return 48 === charCode || 49 === charCode;
   }
 
   // From [Lua 5.2](http://www.lua.org/manual/5.2/manual.html#8.1) onwards
@@ -2642,7 +2644,7 @@
         // After what, must not be on the same line as next
         if (theSingleLine === token.line && EOF !== token.type) unexpected('?');
 
-        var base = { type: Identifier, name: '?' };
+        base = { type: Identifier, name: '?' };
         return finishNode(ast.callExpression(base, expressions));
       } else {
         return unexpected(token);
@@ -2898,7 +2900,9 @@
         case 42: case 47: case 37: return 10; // * / %
         case 43: case 45: return 9; // + -
         case 38: return 6; // &
-        case 126: if (!features.smileyBitwiseXor) return 5; // ~
+        case 126:
+          if (!features.smileyBitwiseXor) return 5; // ~
+          break;
         case 124: return 4; // |
         case 60: case 62: return 3; // < >
       }
@@ -2911,12 +2915,13 @@
             return 3; // <= >=
         case 94:
             if ('^^' === operator) return 12; // ^^
+            break;
         case 61: case 126: return 3; // == ~=
         case 111: return 1; // or
       }       // Other 3-length token that can get here: 'end', 'and'
     } else if (3 === length && (60 === charCode || 62 === charCode)) {
       // The only operators that can make it here are '>>>', '<<>' and '>><'
-      return 7
+      return 7;
     } else if (97 === charCode && 'and' === operator) return 2;
     return 0;
   }
@@ -3262,11 +3267,11 @@
 
   function expandInherted(_versionId) {
     if ('undefined' !== typeof _versionId) {
-      let features = versionFeatures[_versionId];
+      var features = versionFeatures[_versionId];
 
       if (Object.hasOwnProperty.call(features, '_inherits') && isArray(features._inherits)) {
-        for (let k = 0; k < features._inherits.length; k++) {
-          const inherited = expandInherted(features._inherits[k]);
+        for (var k = 0; k < features._inherits.length; k++) {
+          var inherited = expandInherted(features._inherits[k]);
           // Entries in "features" (child) will override inherited ones (that are in "inherited")
           features = assign({}, inherited, features);
         }
@@ -3274,16 +3279,16 @@
         features._inherits = [];
       }
 
-      return features
+      return features;
     }
 
     // No version provided, expand all inplace
-    for (const versionId in versionFeatures)
+    for (var versionId in versionFeatures)
       if (Object.hasOwnProperty.call(versionFeatures, versionId))
         versionFeatures[versionId] = expandInherted(versionId);
   }
 
-  expandInherted()
+  expandInherted();
   exports.versionFeatures = versionFeatures;
 
   function parse(_input, _options) {
