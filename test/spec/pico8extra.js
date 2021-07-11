@@ -18,6 +18,33 @@
   exports.name = 'pico8extra';
   exports.spec = [
     {
+      "source": "?a,1,2",
+      "result": "[1:1] unexpected symbol '?' near '<bof>'"
+    },
+    {
+      "source": "",
+      "result": {
+        "type": "Chunk",
+        "body": [],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 0
+          }
+        },
+        "range": [
+          0,
+          0
+        ],
+        "comments": [],
+        "globals": []
+      }
+    },
+    {
       "source": "?\n",
       "result": {
         "type": "Chunk",
@@ -25,8 +52,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [],
             "loc": {
@@ -78,8 +119,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [
               {
@@ -151,8 +206,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [
               {
@@ -224,8 +293,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [
               {
@@ -310,6 +393,318 @@
       }
     },
     {
+      "source": "?a",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallExpression",
+            "base": {
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
+            },
+            "arguments": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 2
+                  }
+                },
+                "range": [
+                  1,
+                  2
+                ],
+                "isLocal": false
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 2
+              }
+            },
+            "range": [
+              0,
+              2
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 2
+          }
+        },
+        "range": [
+          0,
+          2
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 2
+              }
+            },
+            "range": [
+              1,
+              2
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
+      "source": "?\na",
+      "result": "[2:2] unexpected symbol '?' near '<eof>'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
+      "source": "a()\n?a\n",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              },
+              "arguments": [],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 3
+                }
+              },
+              "range": [
+                0,
+                3
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 3
+              }
+            },
+            "range": [
+              0,
+              3
+            ]
+          },
+          {
+            "type": "CallExpression",
+            "base": {
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 2,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 3
+                }
+              },
+              "range": [
+                4,
+                3
+              ]
+            },
+            "arguments": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 2,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 2,
+                    "column": 2
+                  }
+                },
+                "range": [
+                  5,
+                  6
+                ],
+                "isLocal": false
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 2
+              }
+            },
+            "range": [
+              4,
+              6
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 2
+          }
+        },
+        "range": [
+          0,
+          6
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
+      "source": "a() ?a",
+      "result": "[1:5] unexpected identifier 'a' near '<eof>'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
+      "source": "?a a()",
+      "result": "[1:6] unexpected symbol '?' near '('",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
+      "source": "?a,\nb",
+      "result": "[2:2] unexpected symbol '?' near '<eof>'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
       "source": "?(a)\n",
       "result": {
         "type": "Chunk",
@@ -317,8 +712,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [
               {
@@ -410,8 +819,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [
               {
@@ -541,8 +964,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [
               {
@@ -759,8 +1196,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                0
+              ]
             },
             "arguments": [
               {
@@ -934,8 +1385,22 @@
           {
             "type": "CallExpression",
             "base": {
-              "type": 8,
-              "name": "?"
+              "type": "Identifier",
+              "name": "?",
+              "loc": {
+                "start": {
+                  "line": 2,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 0
+                }
+              },
+              "range": [
+                1,
+                0
+              ]
             },
             "arguments": [
               {

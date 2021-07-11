@@ -2271,6 +2271,153 @@
       }
     },
     {
+      "source": "if (1) local a = 1",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "IfStatement",
+            "clauses": [
+              {
+                "type": "IfClause",
+                "condition": {
+                  "type": "NumericLiteral",
+                  "value": 1,
+                  "raw": "1",
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 4
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 5
+                    }
+                  },
+                  "range": [
+                    4,
+                    5
+                  ]
+                },
+                "body": [
+                  {
+                    "type": "LocalStatement",
+                    "variables": [
+                      {
+                        "type": "Identifier",
+                        "name": "a",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 13
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 14
+                          }
+                        },
+                        "range": [
+                          13,
+                          14
+                        ],
+                        "isLocal": true
+                      }
+                    ],
+                    "init": [
+                      {
+                        "type": "NumericLiteral",
+                        "value": 1,
+                        "raw": "1",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 17
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 18
+                          }
+                        },
+                        "range": [
+                          17,
+                          18
+                        ]
+                      }
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 18
+                      }
+                    },
+                    "range": [
+                      7,
+                      18
+                    ]
+                  }
+                ],
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 18
+                  }
+                },
+                "range": [
+                  0,
+                  18
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 18
+              }
+            },
+            "range": [
+              0,
+              18
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 18
+          }
+        },
+        "range": [
+          0,
+          18
+        ],
+        "comments": [],
+        "globals": []
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
       "source": "if (1) else\n",
       "result": {
         "type": "Chunk",

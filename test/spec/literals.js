@@ -3673,6 +3673,127 @@
       }
     },
     {
+      "source": "a = 0x",
+      "result": "[1:7] malformed number near '0x'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.2"
+      }
+    },
+    {
+      "source": "a = 0x.f",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "NumericLiteral",
+                "value": 0.9375,
+                "raw": "0x.f",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 8
+                  }
+                },
+                "range": [
+                  4,
+                  8
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 8
+              }
+            },
+            "range": [
+              0,
+              8
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 8
+          }
+        },
+        "range": [
+          0,
+          8
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.2"
+      }
+    },
+    {
       "source": "a = 1",
       "result": {
         "type": "Chunk",
@@ -6021,8 +6142,118 @@
       }
     },
     {
+      "source": "a = 0",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "AssignmentStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              }
+            ],
+            "init": [
+              {
+                "type": "NumericLiteral",
+                "value": 0,
+                "raw": "0",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 5
+                  }
+                },
+                "range": [
+                  4,
+                  5
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 5
+              }
+            },
+            "range": [
+              0,
+              5
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 5
+          }
+        },
+        "range": [
+          0,
+          5
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
       "source": "a = 0b",
-      "result": "[1:2] 'number' expected near '='",
+      "result": "[1:7] malformed number near '0b'",
       "options": {
         "comments": true,
         "locations": true,

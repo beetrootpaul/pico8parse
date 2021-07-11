@@ -1,19 +1,23 @@
 # replacement for us poor lost souls windows users, thanks
-# most of this is untested
+# 'profile' and 'benchmark-previous' are not implemented
+# update tab-completion by getting the list from $_targets.Keys
 
 #region stuff
 [CmdletBinding()]
 param (
     [Parameter()]
-    [String[]]
-    $Targets
+    [ValidateSet('benchmark', 'coverage', 'scaffold-test', 'version-bump', 'lint', 'docs-md', 'update', 'clean', 'test-node', 'build', 'benchmark-previous', 'docs-index', 'testem-engines', 'docs', 'complexity-analysis', 'coverage-analysis', '%.html', 'qa', 'install', 'profile', 'test', 'scaffold-tests')]
+    [String[]] $Targets
 )
 function Invoke-Target {
     param ([Parameter(Mandatory)][String] $Target)
     $Local:it = $_targets[$target]
-    if ($Local:it.GetType().Name -cne 'DependsOn') {
-        Invoke-Command -ScriptBlock $Local:it -NoNewScope
-    } else { $Local:it.Invoke() }
+    if (-not $Local:it) { Write-Host "No rule to make target '$target'.  Stop."
+    } else {
+        if ($Local:it.GetType().Name -cne 'DependsOn') {
+            Invoke-Command -ScriptBlock $Local:it -NoNewScope
+        } else { $Local:it.Invoke() }
+    }
 }
 class DependsOn {
     [Array] $_dependencyTargets
@@ -98,8 +102,8 @@ $_targets = @{
     # Coverage
     # --------
     'coverage' = {
-        Remove-Item -Recurse -Force .\html-report\
-        Remove-Item -Recurse -Force .\docs\coverage\
+        if (Test-Path .\html-report\) { Remove-Item -Recurse -Force .\html-report\ }
+        if (Test-Path .\docs\coverage\) { Remove-Item -Recurse -Force .\docs\coverage\ }
         & $BIN\nyc.ps1 --reporter=html --report-dir=.\docs\coverage node .\test\runner.js --console | Out-Null
     }
 
@@ -122,8 +126,10 @@ $_targets = @{
     'qa' = [DependsOn]::new(@('test', 'lint', 'complexity-analysis', 'coverage-analysis'))
 
     'clean' = {
-        Remove-Item -Force docs/*.html
-        Remove-Item -Recurse -Force lib-cov coverage html-report docs/coverage/
+        if (Test-Path $folder) { Remove-Item -Force docs/*.html }
+        foreach ($it in @('lib-cov', 'coverage', 'html-report', 'docs/coverage/')) {
+            if (Test-Path $it) { Remove-Item -Recurse -Force $it }
+        }
     }
 } #</> $_targets
 

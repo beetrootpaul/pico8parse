@@ -4341,6 +4341,102 @@
       }
     },
     {
+      "source": "a = 1 != 2",
+      "result": "[1:7] unexpected symbol '!' near '1'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
+      "source": "a = 1 \\ 2",
+      "result": "[1:7] unexpected symbol '\\' near '1'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
+      "source": "a = @ 1",
+      "result": "[1:5] unexpected symbol '@' near '='",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
+      "source": "a = % 1",
+      "result": "[1:4] <expression> expected near '%'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
+      "source": "a = $ 1",
+      "result": "[1:5] unexpected symbol '$' near '='",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
+      "source": "a = 1 ^^ 2",
+      "result": "[1:7] <expression> expected near '^'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
+      "source": "",
+      "result": {
+        "type": "Chunk",
+        "body": [],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 0
+          }
+        },
+        "range": [
+          0,
+          0
+        ],
+        "comments": [],
+        "globals": []
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "5.3"
+      }
+    },
+    {
       "source": "a += b",
       "result": {
         "type": "Chunk",
@@ -6478,6 +6574,28 @@
     {
       "source": "a <<<= b",
       "result": "[1:2] '=' expected near '<<'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
+      "source": "a <= b",
+      "result": "[1:2] '=' expected near '<='",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1"
+      }
+    },
+    {
+      "source": "a >= b",
+      "result": "[1:2] '=' expected near '>='",
       "options": {
         "comments": true,
         "locations": true,

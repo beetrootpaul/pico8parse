@@ -1186,9 +1186,10 @@
     digitStart = index += 2; // Skip 0x part
 
     // A minimum of one hex digit is required.
-    // "0x.A" is valid from Lua 5.2 onward
-    if (features.noTrailingDotInHexNumeral && !isHexDigit(input.charCodeAt(index)))
-      raise(null, errors.malformedNumber, input.slice(tokenStart, index));
+    // "0x.A" is valid if noTrailingDotInHexNumeral (from Lua 5.2 onward)
+    if (!isHexDigit(input.charCodeAt(index)))
+      if (features.noTrailingDotInHexNumeral || '.' !== input.charAt(index))
+        raise(null, errors.malformedNumber, input.slice(tokenStart, index));
 
     while (isHexDigit(input.charCodeAt(index))) ++index;
     // Convert the hexadecimal digit to base 10.
@@ -1237,9 +1238,6 @@
       binaryExponent = Math.pow(2, binaryExponent * binarySign);
     }
 
-    // Cannot be empty
-    if (digitStart === index) raise(token, errors.expected, 'number', tokenValue(token));
-
     return {
       value: (digit + fraction) * binaryExponent,
       hasFractionPart: foundFraction || foundBinaryExponent,
@@ -1261,8 +1259,13 @@
 
     digitStart = index += 2; // Skip 0b part
 
+    // A minimum of one bin digit is required.
+    // "0x.1" is valid (will assume so as only PICO-8-xyz get there)
+    if (!isBinDigit(input.charCodeAt(index)) && '.' !== input.charAt(index))
+      raise(null, errors.malformedNumber, input.slice(tokenStart, index));
+
     while (isBinDigit(input.charCodeAt(index))) ++index;
-    // Convert the hexadecimal digit to base 10.
+    // Convert the binary digit to base 10.
     if (digitStart < index)
       digit = parseInt(input.slice(digitStart, index), 2);
     else digit = 0; // No decimal part.
@@ -1283,9 +1286,6 @@
     }
 
     // No binary exponents.
-
-    // Cannot be empty
-    if (digitStart === index) raise(token, errors.expected, 'number', tokenValue(token));
 
     return {
       value: digit + fraction,
@@ -1453,8 +1453,7 @@
     switch (escapedChar) {
       case '*': // Repeat next character P0 times. ?"\*3a" --> aaa
         // This escape sequence needs something after P0 (maybe) (but what?)
-        if ('"' === p0 || -1 === p1CharCode || isLineTerminator(p1CharCode))
-          break
+        if ('"' === p0 || -1 === p1CharCode || isLineTerminator(p1CharCode)) break;
         /* fall through */
       case '+': // Shift cursor by P0-16, P1-16 pixels
         if ('+' === escapedChar && !isValidEscapeParam(p1CharCode)) break;
@@ -1907,13 +1906,23 @@
 
   // Complete the location data stored in the `Marker` by adding the location
   // of the *previous token* as an end location.
+  //
+  // If there is no previousToken as of yet, it is assumed to be BOF
   Marker.prototype.complete = function() {
     if (options.locations) {
-      this.loc.end.line = previousToken.lastLine || previousToken.line;
-      this.loc.end.column = previousToken.range[1] - (previousToken.lastLineStart || previousToken.lineStart);
+      if (!previousToken) {
+        this.loc.end.line = 1;
+        this.loc.end.column = 0;
+      } else {
+        this.loc.end.line = previousToken.lastLine || previousToken.line;
+        this.loc.end.column = previousToken.range[1] - (previousToken.lastLineStart || previousToken.lineStart);
+      }
     }
     if (options.ranges) {
-      this.range[1] = previousToken.range[1];
+      if (!previousToken)
+        this.range[1] = 0;
+      else
+        this.range[1] = previousToken.range[1];
     }
   };
 
@@ -2622,6 +2631,10 @@
       } else if (features.singleLinePrint && '?' === token.value) {
         var theSingleLine = token.line
           , previousTokenLine = previousToken ? previousToken.line : -1;
+
+        pushLocation(marker);
+        base = finishNode(ast.identifier('?'));
+
         next();
         pushLocation(marker);
 
@@ -2642,7 +2655,6 @@
         // After what, must not be on the same line as next
         if (theSingleLine === token.line && EOF !== token.type) unexpected('?');
 
-        base = { type: Identifier, name: '?' };
         return finishNode(ast.callExpression(base, expressions));
       } else {
         return unexpected(token);
@@ -2898,9 +2910,7 @@
         case 42: case 47: case 37: return 10; // * / %
         case 43: case 45: return 9; // + -
         case 38: return 6; // &
-        case 126:
-          if (!features.smileyBitwiseXor) return 5; // ~
-          break;
+        case 126: return 5; // ~
         case 124: return 4; // |
         case 60: case 62: return 3; // < >
       }
@@ -2909,11 +2919,9 @@
         case 47: return 10; // //
         case 46: return 8; // ..
         case 60: case 62:
-            if ('<<' === operator || '>>' === operator) return 7; // << >>
-            return 3; // <= >=
-        case 94:
-            if ('^^' === operator) return 12; // ^^
-            break;
+          if ('<<' === operator || '>>' === operator) return 7; // << >>
+          return 3; // <= >=
+        case 94: return 12; // ^^
         case 61: case 126: return 3; // == ~=
         case 111: return 1; // or
       }       // Other 3-length token that can get here: 'end', 'and'
@@ -3263,7 +3271,7 @@
 
   // Expand the '_inherits' of each version (recursively).
 
-  function expandInherted(_versionId) {
+  /* istanbul ignore next */ function expandInherted(_versionId) {
     if ('undefined' !== typeof _versionId) {
       var features = versionFeatures[_versionId];
 

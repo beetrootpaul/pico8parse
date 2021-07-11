@@ -65,11 +65,14 @@ scaffold-test:
 docs: coverage docs-test docs-md
 
 docs-index:
-	$(BIN)/marked README.md --gfm \
+	$(BIN)/marked README-luaparse.md --gfm \
 		| cat docs/layout/head.html - docs/layout/foot.html \
 		> docs/index.html
 
 docs-md: docs-index $(patsubst %.md,%.html, $(wildcard docs/*.md))
+	$(BIN)/marked README.md --gfm \
+		| cat docs/layout/head.html - docs/layout/foot.html \
+		> docs/fork.html
 
 %.html: %.md
 	echo $<

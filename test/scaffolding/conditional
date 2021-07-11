@@ -33,6 +33,7 @@ if 1 then elseif then end               -- FAIL
 // singleLineIf
 if (1)@n@                               -- FAIL
 if (1) local a = 1@n@
+if (1) local a = 1
 if (1) else@n@
 if (1) local a = 1 else@n@
 if (1) else local b = 1@n@

@@ -43,6 +43,17 @@ a = ~ p ~ q / r
 a = a <=                                -- FAIL
 a = a >=                                -- FAIL
 
+// !traditionalNotEqual
+a = 1 != 2                              -- FAIL
+// !backslashIntegerDivision
+a = 1 \ 2                               -- FAIL
+// !peekPokeOperators
+a = @ 1                                 -- FAIL
+a = % 1                                 -- FAIL
+a = $ 1                                 -- FAIL
+// !smileyBitwiseXor
+a = 1 ^^ 2                              -- FAIL
+
 // { "luaVersion": "PICO-8-0.2.1" }
 // assignmentOperators (including for bitwiseOperators, bitshiftAdditionalOperators, backslashIntegerDivision and smileyBitwiseXor)
 a += b
@@ -67,6 +78,8 @@ a >>>= b
 a <<>= b
 a >><= b
 a <<<= b                                -- FAIL
+a <= b                                  -- FAIL
+a >= b                                  -- FAIL
 // traditionalNotEqual
 a = 1 != 2
 a = 1 !=                                -- FAIL

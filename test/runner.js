@@ -75,6 +75,7 @@
       , './spec/local'
       , './spec/misc'
       , './spec/operators'
+      , './spec/pico8extra'
       , './spec/repeat'
       , './spec/return'
       , './spec/scope'

@@ -39,7 +39,8 @@ a = '\u{}'                      -- FAIL
 a = '\u{0g}'                    -- FAIL
 
 // { "luaVersion": "PICO-8-0.2.2" }
-// p8scii (untested, just took this from the https://iiviigames.github.io/pico8-api/)
+// p8scii (no idea what each realy should be, took most of this from the https://iiviigames.github.io/pico8-api/)
+a = "\*                         -- FAIL
 a = "\#c\f5 blue "
 a = "\0"
 a = "\*"                        -- FAIL

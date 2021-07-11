@@ -2422,6 +2422,17 @@
       }
     },
     {
+      "source": "a = \"\\*",
+      "result": "[1:7] invalid escape sequence near '\\*'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.2"
+      }
+    },
+    {
       "source": "a = \"\\#c\\f5 blue \"",
       "result": {
         "type": "Chunk",

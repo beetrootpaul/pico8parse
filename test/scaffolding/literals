@@ -49,6 +49,8 @@ a = [=[x]x                                -- FAIL
 // { "luaVersion": "5.2" }
 a = "\u"                                  -- FAIL
 a = "\?"                                  -- FAIL
+a = 0x                                    -- FAIL
+a = 0x.f
 // { "luaVersion": "LuaJIT" }
 a = 1
 a = 1L                                    -- FAIL
@@ -92,6 +94,7 @@ a = 1.."bar"                              -- FAIL
 
 // { "luaVersion": "PICO-8-0.2.1" }
 // binLiteral
+a = 0
 a = 0b                                    -- FAIL
 a = 0b101010
 a = 0b01.
