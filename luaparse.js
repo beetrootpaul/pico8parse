@@ -88,6 +88,10 @@
     , luaVersion: '5.1'
     // Encoding mode: how to interpret code units higher than U+007F in input
     , encodingMode: 'none'
+    // This option should be reserved for testing but may be use if needed;
+    // it overrides the `strictP8FileFormat` feature, making it possible to parse
+    // snippets lacking the proper header and sections
+    , ignoreStrictP8FileFormat: true // TODO: change it to 'false' and edit tests
   };
 
   function encodeUTF8(codepoint, highMask) {
@@ -717,26 +721,40 @@
     , comments
     , tokenStart
     , line
-    , lineStart;
+    , lineStart
+    , currentP8Section;
 
   exports.lex = lex;
 
   function lex() {
     skipWhiteSpace();
 
-    // Skip comments beginning with --
-    while (45 === input.charCodeAt(index) &&
-           45 === input.charCodeAt(index + 1)) {
-      scanComment();
-      skipWhiteSpace();
-    }
-    if (index >= length) return consumeEOF();
+    if (features.strictP8FileFormat)
+      while ('__lua__' !== currentP8Section)
+        skipP8Section();
 
     var charCode = input.charCodeAt(index)
       , next = input.charCodeAt(index + 1);
 
+    // Skip comments beginning with -- and, if the feature is enabled, with //
+    while (45 === charCode && 45 === next ||
+           features.traditionalComments &&
+           47 === charCode && 47 === next) {
+      scanComment();
+      skipWhiteSpace();
+      charCode = input.charCodeAt(index);
+      next = input.charCodeAt(index + 1);
+    }
+    if (index >= length) return consumeEOF();
+
     // Memorize the range index where the token begins.
     tokenStart = index;
+    if (features.strictP8FileFormat &&
+        95 === charCode && 95 === next &&
+        isLineTerminator(input.charCodeAt(index - 1))) {
+      currentP8Section = scanP8SectionStart();
+      if (null != currentP8Section) return lex();
+    }
     if (isIdentifierStart(charCode)) return scanIdentifierOrKeyword();
     if (isStringQuote(charCode)) return scanStringLiteral();
     if (isDecDigit(charCode) || 46 === charCode && isDecDigit(next)) return scanNumericLiteral();
@@ -792,7 +810,8 @@
     };
   }
 
-  // ... except when it does, see comments above the following functions:
+  // "Whitespace has no semantic meaning in lua..." except when it is given one,
+  // see comments above the following functions:
   //  - skipWhiteSpace
   //  - isBlockFollow
   //  - isEnd
@@ -812,6 +831,22 @@
     return false;
   }
 
+  // Skips until the next section-starting sequence or EOF
+
+  function skipP8Section() {
+    var sequence;
+    while (index < length) {
+      while (isLineTerminator(input.charCodeAt(index))) consumeEOL();
+      if (isLineTerminator(input.charCodeAt(index-1)) && '_' === input.charAt(lineStart)) {
+        sequence = scanP8SectionStart();
+        if (sequence) break;
+      }
+      index++;
+    }
+    currentP8Section = sequence;
+  }
+
+  // XXX: (move to appropriate doc please)
   // Lua PICO-8 introduced 3 (janky) whitespace-dependent syntaxes: singleLineIf,
   // singleLineWhile and singleLinePrint. While they all require an ending newline,
   // singleLineIf and singleLineWhile may start with any blank character, singleLinePrint
@@ -876,6 +911,21 @@
       , lineStart: lineStart
       , range: [tokenStart, index]
     };
+  }
+
+  // Will also consume until the next EOL/EOF and increase line accordingly
+
+  function scanP8SectionStart() {
+    for (var k = 0; k < features.p8Sections.length; k++) {
+      var section = features.p8Sections[k];
+      if (input.slice(index, index+section.length) === section) {
+        index += section.length;
+        while (index < length && !isLineTerminator(input.charCodeAt(index))) index++;
+        if (isLineTerminator(input.charCodeAt(index))) consumeEOL();
+        return section;
+      }
+    }
+    return null;
   }
 
   // Will try to scan for VarargLiteral and Punctuator;
@@ -1507,8 +1557,12 @@
   //
   // The multiline functionality works the exact same way as with string
   // literals so we reuse the functionality.
+  //
+  // If the feature `traditionalComments` is on, this kind of comment cannot
+  // be multiline.
 
   function scanComment() {
+    var canBeMultiline = '-' === input.charAt(index);
     tokenStart = index;
     index += 2; // --
 
@@ -1519,7 +1573,7 @@
       , lineStartComment = lineStart
       , lineComment = line;
 
-    if ('[' === character) {
+    if (canBeMultiline && '[' === character) {
       content = readLongString(true);
       // This wasn't a multiline comment after all.
       if (false === content) content = character;
@@ -2378,12 +2432,11 @@
     //  - no character before statement
     //  - character before statement is whitespace or lineterminator
     if (canBeSingleLineIf /*&& true !== newLineIsEnd*/) {
-      var startIndex = token.range[0];
-      canBeSingleLineIf = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
-      // If the previous token is not a numeral (or beginning of stream), scan backward
-      // 1 character expecting a blank character (whitespace or lineterminator)
+      canBeSingleLineIf = !previousToken || NumericLiteral === previousToken.type || 0 === token.range[0];
+      // If the previous token is not a numeral (or beginning of stream), scan 1 character
+      // past the previous token expecting a blank character (whitespace or lineterminator)
       if (!canBeSingleLineIf) {
-        var previousCharCode = input.charCodeAt(startIndex-1);
+        var previousCharCode = input.charCodeAt(previousToken.range[1]);
         canBeSingleLineIf = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
       }
     }
@@ -3194,14 +3247,56 @@
     },
     // NOTE: p8 file format layout (not the png.p8 but the text p8)
     'PICO-8': {
-      p8FileHeader: true, // no shebang but a 2 lines header (giving a version num)
-      p8SectionLua: '__lua__',
-      p8SectionGfx: '__gfx__',
-      p8SectionGff: '__gff__',
-      p8SectionLabel: '__label__',
-      p8SectionMap: '__map__',
-      p8SectionSfx: '__sfx__',
-      p8SectionMusic: '__music__',
+      // XXX: (move to appropriate doc please)
+      // The PICO-8 file format (.p8, text) defines a set of rules that must be followed
+      // for a file to be correctly loaded:
+      //
+      //    - the first line of the file must contain the mention "pico-8 cartridges"
+      //      (17 characters, case sensitive) any character may be present before and
+      //      after (no new-line sequence before, obviously)
+      //
+      //    - there exists (as of 0.2.2) 7 sections in a p8 file each identified by a set
+      //      sequence of character (similar to Python's dunders) from the list bellow
+      //
+      //    - a section is entered as soon as a line containing on of these sequences is
+      //      passed; the following lines are part of said section until any next one
+      //      of these or EOF
+      //
+      //    - these sequences are only valid section opening if they are present at
+      //      the very beginning of the line; any amount of any character may follow
+      //
+      //    - outside of section (typically right after the "pico-8 cartridges" header,
+      //      before any sequence), lines are simply discarded
+      //
+      //    - as a section is closed by a new one, multiple section under the same sequence
+      //      can be present within the file; section for a given sequence are concatenated
+      //      in order of appearance
+      //
+      //    - only within a __lua__ section may PICO-8 Lua be parsed, starting on the very
+      //      next line
+      //
+      //    - a __lua__ section may be closed at any point (eg. in the middle of an
+      //      assagnment) and resume in a next __lua__ section, this is still considered
+      //      valid
+      //
+      //    - _usually_, the first line is as bellow, the second line present a version
+      //      number (noted VER) and each section is present once in the order of the
+      //      list of sequences hereafter
+      //
+      //  ```
+      //  pico-8 cartridge // http://www.pico-8.com
+      //  version VER
+      //  ```
+      strictP8FileFormat: true,
+      p8Sections: [
+          '__lua__'
+        , '__gfx__'
+        , '__gff__'
+        , '__label__'
+        , '__map__'
+        , '__sfx__'
+        , '__music__'
+      ]
     },
     // NOTE: first implemented version (some features may have existed before 0.2.1)
     'PICO-8-0.2.1': {
@@ -3257,6 +3352,7 @@
       singleLinePrint: true,      // slprint ::= '\n' '?' [explist] '\n'   the result is a CallStatement node
       assignmentOperators: true,  // a += b
       traditionalNotEqual: true,  // a != b
+      traditionalComments: true,  // '//' is a comment (this would take precedence on the int div)
       bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
       peekPokeOperators: true,    // @a   %a   $a
       backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above), same about assignment operators)
@@ -3318,6 +3414,7 @@
     lookahead = undefined;
     comments = undefined;
     tokenStart = undefined;
+    currentP8Section = undefined;
     // Please just rewind the lexer properly
     isEnd.newLineIsEnd = false;
     isEnd.foundEndIsNewLine = false;
@@ -3361,10 +3458,30 @@
   function end(_input) {
     if ('undefined' !== typeof _input) write(_input);
 
-    // Ignore shebangs.
-    if (input && input.substr(0, 2) === '#!') input = input.replace(/^.*/, function (line) {
-      return line.replace(/./g, ' ');
-    });
+    if (!features.strictP8FileFormat) {
+      // Ignore shebangs.
+      if (input && input.substr(0, 2) === '#!') {
+        while (!isLineTerminator(input.charCodeAt(++index)));
+        line++;
+      }
+    } else if (!options.ignoreStrictP8FileFormat) {
+      // Check for header
+      index = input.indexOf("pico-8 cartridges")
+      if (index < 0) raise(null, errors.expected, "pico-8 cartridges", '<bof>');
+      index += 16;
+      // Ignore until first valid p8Section
+      var match;
+      do {
+        match = input.slice(++index).match(/^__.*?__/m);
+        if (null === match) break;
+        index += match.index;
+        currentP8Section = scanP8SectionStart();
+      } while (null === currentP8Section);
+      // Reaching the end of stream before finding anything is fine (content is just discarded)
+      if (!match) index = input.length;
+      // Count any newline that was passed (minus the one that was counted by `scanP8SectionStart()`)
+      else line += input.slice(0, index).split('\n').length-2;
+    } /* istanbul ignore else */ else currentP8Section = '__lua__';
 
     length = input.length;
     trackLocations = options.locations || options.ranges;

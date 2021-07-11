@@ -472,6 +472,10 @@
       "type": "Chunk", "body": [{"type": "ReturnStatement", "arguments": [], "loc": {"start": {"line": 2, "column": 0}, "end": {"line": 2, "column": 6}}, "range": [15, 21]}], "loc": {"start": {"line": 2, "column": 0}, "end": {"line": 2, "column": 6}}, "range": [15, 21], "comments": []
     }, 'should ignore shebangs');
 
+    /*this.deepEqual(luaparse.parse('pico-8 cartridge // http://www.pico-8.com\nversion VER\nprint()', { locations: true, ranges: true }), {
+      *-*
+    }, 'should ignore p8 headers');*/
+
     this.done(11);
   });
 
