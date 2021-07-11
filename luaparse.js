@@ -730,30 +730,7 @@
       scanComment();
       skipWhiteSpace();
     }
-    if (index >= length) {
-      // From a single line statement, any dangling `isEnd.newLineIsEnd`
-      // makes the EOF a valid 'end' token, but this is not optionnal
-      // and will be an syntax error under certain circumstances.
-      if (isEnd.newLineIsEnd) {
-        if (token && EOF === token.type) {
-          isEnd.newLineIsEnd = false;
-          token = {
-              type: Keyword
-            , value: 'end'
-            , line: line
-            , lineStart: lineStart
-            , range: [tokenStart, index]
-          };
-        }
-      }
-      return {
-          type : EOF
-        , value: '<eof>'
-        , line: line
-        , lineStart: lineStart
-        , range: [index, index]
-      };
-    }
+    if (index >= length) return consumeEOF();
 
     var charCode = input.charCodeAt(index)
       , next = input.charCodeAt(index + 1);
@@ -761,112 +738,13 @@
     // Memorize the range index where the token begins.
     tokenStart = index;
     if (isIdentifierStart(charCode)) return scanIdentifierOrKeyword();
+    if (isStringQuote(charCode)) return scanStringLiteral();
+    if (isDecDigit(charCode) || 46 === charCode && isDecDigit(next)) return scanNumericLiteral();
 
-    switch (charCode) {
-      case 39: case 34: // '"
-        return scanStringLiteral();
-
-      case 48: case 49: case 50: case 51: case 52: case 53:
-      case 54: case 55: case 56: case 57: // 0-9
-        return scanNumericLiteral();
-
-      case 46: // .
-        // If the dot is followed by a digit it's a float.
-        if (isDecDigit(next)) return scanNumericLiteral();
-        if (46 === next) {
-          if (46 === input.charCodeAt(index + 2)) return scanVarargLiteral();
-          return scanPunctuatorMaybeAssignmentOperators('..');
-        }
-        return scanPunctuator('.');
-
-      case 61: // =
-        if (61 === next) return scanPunctuator('==');
-        return scanPunctuator('=');
-
-      case 62: // >
-        if (features.bitwiseOperators) {
-          if (62 === next) {
-            if (features.bitshiftAdditionalOperators) {
-              if (62 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('>>>');
-              if (60 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('>><');
-            }
-            return scanPunctuatorMaybeAssignmentOperators('>>');
-          }
-        }
-        if (61 === next) return scanPunctuator('>=');
-        return scanPunctuator('>');
-
-      case 60: // <
-        if (features.bitwiseOperators) {
-          if (60 === next) {
-            if (features.bitshiftAdditionalOperators)
-              if (62 === input.charCodeAt(index + 2)) return scanPunctuatorMaybeAssignmentOperators('<<>');
-            return scanPunctuatorMaybeAssignmentOperators('<<');
-          }
-        }
-        if (61 === next) return scanPunctuator('<=');
-        return scanPunctuator('<');
-
-      case 126: // ~
-        if (61 === next) return scanPunctuator('~=');
-        if (!features.bitwiseOperators || features.smileyBitwiseXor)
-          break;
-        return scanPunctuator('~');
-
-      case 33: // !
-        if (!features.traditionalNotEqual)
-          break;
-        // when traditionalNotEqual is truthy, both syntaxes are accepted:
-        // "!=" token are disguised as "~=" (takes advantage of the fact
-        // that scanPunctuator does not care about what's actually there
-        // and most importantly that they are the same length)
-        if (61 === next) return scanPunctuator('~=');
-        break;
-
-      case 58: // :
-        if (features.labels)
-          if (58 === next) return scanPunctuator('::');
-        return scanPunctuator(':');
-
-      case 91: // [
-        // Check for a multiline string, they begin with [= or [[
-        if (91 === next || 61 === next) return scanLongStringLiteral();
-        return scanPunctuator('[');
-
-      case 47: // /
-        // Check for integer division op (//)
-        if (features.integerDivision)
-          if (47 === next) return scanPunctuator('//');
-        return scanPunctuatorMaybeAssignmentOperators('/');
-
-      case 92: // \
-        if (!features.backslashIntegerDivision)
-          break;
-        return scanPunctuatorMaybeAssignmentOperators('\\');
-
-      case 94: // ^
-        if (features.smileyBitwiseXor)
-          if (94 === next) return scanPunctuatorMaybeAssignmentOperators('^^');
-        return scanPunctuatorMaybeAssignmentOperators('^');
-
-      case 38: case 124: // & |
-        if (!features.bitwiseOperators)
-          break;
-        return scanPunctuatorMaybeAssignmentOperators(input.charAt(index));
-
-      case 64: case 36: // @ $
-        if (!features.peekPokeOperators)
-          break;
-        return scanPunctuator(input.charAt(index));
-
-      case 42: case 37: case 45: case 43: // * % - +
-        return scanPunctuatorMaybeAssignmentOperators(input.charAt(index));
-
-      case 44: case 123: case 125: case 93:
-      case 40: case 41: case 59: case 35:
-      case 63: // , { } ] ( ) ; # ?
-        return scanPunctuator(input.charAt(index));
-    }
+    // Will try to scan for VarargLiteral and Punctuator;
+    // if it does not appear to match any, returns null.
+    var other = scanOther(charCode, next);
+    if (null !== other) return other;
 
     return unexpected(input.charAt(index));
   }
@@ -889,6 +767,29 @@
       return true;
     }
     return false;
+  }
+
+  function consumeEOF() {
+    // From a single line statement, any dangling `isEnd.newLineIsEnd`
+    // makes the EOF a valid 'end' token, but this is not optionnal
+    // and will be an syntax error under certain circumstances.
+    if (isEnd.newLineIsEnd && token && EOF === token.type) {
+      isEnd.newLineIsEnd = false;
+      token = {
+          type: Keyword
+        , value: 'end'
+        , line: line
+        , lineStart: lineStart
+        , range: [tokenStart, index]
+      };
+    }
+    return {
+        type : EOF
+      , value: '<eof>'
+      , line: line
+      , lineStart: lineStart
+      , range: [index, index]
+    };
   }
 
   // ... except when it does, see comments above the following functions:
@@ -977,6 +878,111 @@
     };
   }
 
+  // Will try to scan for VarargLiteral and Punctuator;
+  // if it does not appear to match any, returns null.
+  //
+  // charCode = input.charCodeAt(index);
+  // next = input.charCodeAt(index + 1);
+
+  function scanOther(charCode, next) {
+    switch (charCode) {
+      case 46: // .
+        if (46 === next) {
+          if (46 === input.charCodeAt(index + 2)) return scanVarargLiteral();
+          return scanPunctuatorMaybeAssignmentOperator('..');
+        }
+        return scanPunctuator('.');
+
+      case 61: // =
+        if (61 === next) return scanPunctuator('==');
+        return scanPunctuator('=');
+
+      case 62: // >
+        if (features.bitwiseOperators && 62 === next) {
+          if (features.bitshiftAdditionalOperators) {
+            switch (input.charCodeAt(index + 2)) {
+              case 62: return scanPunctuatorMaybeAssignmentOperator('>>>');
+              case 60: return scanPunctuatorMaybeAssignmentOperator('>><');
+            }
+          }
+          return scanPunctuatorMaybeAssignmentOperator('>>');
+        }
+        if (61 === next) return scanPunctuator('>=');
+        return scanPunctuator('>');
+
+      case 60: // <
+        if (features.bitwiseOperators && 60 === next) {
+          if (features.bitshiftAdditionalOperators && 62 === input.charCodeAt(index + 2))
+            return scanPunctuatorMaybeAssignmentOperator('<<>');
+          return scanPunctuatorMaybeAssignmentOperator('<<');
+        }
+        if (61 === next) return scanPunctuator('<=');
+        return scanPunctuator('<');
+
+      case 126: // ~
+        if (61 === next) return scanPunctuator('~=');
+        if (!features.bitwiseOperators || features.smileyBitwiseXor)
+          break;
+        return scanPunctuator('~');
+
+      case 33: // !
+        // when traditionalNotEqual is truthy, both syntaxes are accepted:
+        // "!=" token are disguised as "~=" (takes advantage of the fact
+        // that scanPunctuator does not care about what's actually there
+        // and most importantly that they are the same length)
+        if (features.traditionalNotEqual && 61 === next) return scanPunctuator('~=');
+        break;
+
+      case 58: // :
+        if (features.labels && 58 === next) return scanPunctuator('::');
+        return scanPunctuator(':');
+
+      case 91: // [
+        // Check for a multiline string, they begin with [= or [[
+        if (91 === next || 61 === next) return scanLongStringLiteral();
+        return scanPunctuator('[');
+
+      case 47: // /
+        // Check for integer division op (//)
+        if (features.integerDivision && 47 === next)
+          return scanPunctuator('//');
+        return scanPunctuatorMaybeAssignmentOperator('/');
+
+      case 92: // \
+        if (!features.backslashIntegerDivision)
+          break;
+        return scanPunctuatorMaybeAssignmentOperator('\\');
+
+      case 94: // ^
+        if (features.smileyBitwiseXor && 94 === next)
+          return scanPunctuatorMaybeAssignmentOperator('^^');
+        return scanPunctuatorMaybeAssignmentOperator('^');
+
+      case 38: case 124: // & |
+        if (!features.bitwiseOperators)
+          break;
+        return scanPunctuatorMaybeAssignmentOperator(input.charAt(index));
+
+      case 64: case 36: // @ $
+        if (!features.peekPokeOperators)
+          break;
+        return scanPunctuator(input.charAt(index));
+
+      case 42: case 37: case 45: case 43: // * % - +
+        return scanPunctuatorMaybeAssignmentOperator(input.charAt(index));
+
+      case 63: // ?
+        if (!features.singleLinePrint)
+          break;
+        return scanPunctuator('?');
+
+      case 44: case 123: case 125: case 93:
+      case 40: case 41: case 59: case 35: // , { } ] ( ) ; #
+        return scanPunctuator(input.charAt(index));
+    }
+    return null;
+  }
+
   // Once a punctuator reaches this function it should already have been
   // validated so we simply return it as a token.
 
@@ -996,7 +1002,7 @@
   // ending '='; if such is found the punctuator is 1 longer, otherwize
   // defaults to `scanPunctuator()`.
 
-  function scanPunctuatorMaybeAssignmentOperators(valuePunctuator) {
+  function scanPunctuatorMaybeAssignmentOperator(valuePunctuator) {
     if (features.assignmentOperators) {
       if (61 === input.charCodeAt(index + valuePunctuator.length)) // op=
         return scanPunctuator(valuePunctuator + '=');
@@ -1425,90 +1431,76 @@
         return input.charAt(index++);
     }
     if (features.p8scii) {
-      // Some escape sequences might be wrongly parsed/modified/replaced
-      // be it here or in the switch above (maybe)
-
-      var p0 = index+1 < length ? input.charAt(++index) : null
-        , p1 = index+1 < length ? input.charAt(++index) : null
-        , p0CharCode = null === p0 ? -1 : p0.charCodeAt(0)
-        , p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
-
-      switch (escapedChar) {
-        case '*': // Repeat next character P0 times. ?"\*3a" --> aaa
-          // This escape sequence needs something after P0 (maybe) (but what?)
-          if ('"' === p0 || -1 === p1CharCode || isLineTerminator(p1CharCode))
-            if (features.strictEscapes)
-              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
-          /* fall through */
-        case '+': // Shift cursor by P0-16, P1-16 pixels
-          if ('+' === escapedChar) {
-            // Valid parameter should be a number or lower case character (maybe)
-            if (p1CharCode < 48 || 57 < p1CharCode && p1CharCode < 97 || 122 < p1CharCode) {
-              if (features.strictEscapes)
-                raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
-            }
-          }
-          /* fall through */
-        case '-': // Shift cursor horizontally by P0-16 pixels
-        case '|': // Shift cursor vertically by P0-16 pixels
-        case '#': // Draw solid background with colour P0
-          // Valid parameter should be a number or lower case character (maybe)
-          if (p0CharCode < 48 || 57 < p0CharCode && p0CharCode < 97 || 122 < p0CharCode) {
-            if (features.strictEscapes)
-              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
-          }
-
-          if (-1 !== p1CharCode) return '\\' + escapedChar + p0 + p1;
-          if (-1 !== p0CharCode) return '\\' + escapedChar + p0;
-          return '\\' + escapedChar;
-
-        case '^': // Special command
-          // Special commands param are shifter by 1 (because of the command itself)
-          if (-1 === p0CharCode || '"' === p0) {
-            if (features.strictEscapes)
-              raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
-          }
-          index = sequenceStart + 1;
-          var command = input.charAt(index);
-          p0 = index+1 < length ? input.charAt(++index) : null;
-          p1 = index+1 < length ? input.charAt(++index) : null;
-          p0CharCode = null === p0 ? -1 : p0.charCodeAt(0);
-          p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
-          // 1..9  -- Skip 1,2,4,8,16,32..256 frames
-          // c -- Cls to colour P0, set cursor to 0,0
-          // g -- Set cursor position to home
-          // h -- Set home to cursor position
-          // j -- Jump to absolute P0*4, P1*4 (in screen pixels)
-          // s -- Set tab stop width to P0 pixels (used by "\t")
-          // x -- Set character width  (default: 4)
-          // y -- Set character height (default: 6)
-          if ("123456789cghjsxy".indexOf(command) >= 0) {
-            var param = "";
-            // Check parameter for some commands;
-            // Valid parameter should be a number or lower case character (maybe)
-            if ('c' === command || 'j' === command || 's' === command) {
-              if (p0CharCode < 48 || 57 < p0CharCode && p0CharCode < 97 || 122 < p0CharCode) {
-                if (features.strictEscapes)
-                  raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
-              }
-              param += p0;
-              if ('j' === command) {
-                if (p1CharCode < 48 || 57 < p1CharCode && p1CharCode < 97 || 122 < p1CharCode) {
-                  if (features.strictEscapes)
-                    raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
-                }
-                param += p1;
-              }
-            } else index--;
-
-            return '\\^' + command + param;
-          }
-      }
+      var sequence = readEscapeSequenceP8SCII(escapedChar, sequenceStart);
+      if (null !== sequence) return sequence;
     }
 
     if (features.strictEscapes)
       raise(null, errors.invalidEscape, '\\' + input.slice(sequenceStart, index + 1));
     return input.charAt(index++);
+  }
+
+  function readEscapeSequenceP8SCII(escapedChar, sequenceStart) {
+    // Some escape sequences might be wrongly parsed/modified/replaced
+    // be it here or in the switch above (maybe)
+
+    var p0 = index+1 < length ? input.charAt(++index) : null
+      , p1 = index+1 < length ? input.charAt(++index) : null
+      , p0CharCode = null === p0 ? -1 : p0.charCodeAt(0)
+      , p1CharCode = null === p1 ? -1 : p1.charCodeAt(0)
+      , params = p0;
+
+    switch (escapedChar) {
+      case '*': // Repeat next character P0 times. ?"\*3a" --> aaa
+        // This escape sequence needs something after P0 (maybe) (but what?)
+        if ('"' === p0 || -1 === p1CharCode || isLineTerminator(p1CharCode))
+          break
+        /* fall through */
+      case '+': // Shift cursor by P0-16, P1-16 pixels
+        if ('+' === escapedChar && !isValidEscapeParam(p1CharCode)) break;
+        params += p1;
+        /* fall through */
+      case '-': // Shift cursor horizontally by P0-16 pixels
+      case '|': // Shift cursor vertically by P0-16 pixels
+      case '#': // Draw solid background with colour P0
+        // Valid parameter should be a number or lower case character (maybe)
+        if (!isValidEscapeParam(p0CharCode)) break;
+
+        return '\\' + escapedChar + params;
+
+      case '^': // Special command
+        // Special commands param are shifter by 1 (because of the command itself)
+        if (-1 === p0CharCode || '"' === p0) break;
+        index = sequenceStart + 1;
+        var command = input.charAt(index++);
+        p0 = p1;
+        p1 = index+1 < length ? input.charAt(++index) : null;
+        p0CharCode = p1CharCode;
+        p1CharCode = null === p1 ? -1 : p1.charCodeAt(0);
+        // 1..9  -- Skip 1,2,4,8,16,32..256 frames
+        // c -- Cls to colour P0, set cursor to 0,0
+        // g -- Set cursor position to home
+        // h -- Set home to cursor position
+        // j -- Jump to absolute P0*4, P1*4 (in screen pixels)
+        // s -- Set tab stop width to P0 pixels (used by "\t")
+        // x -- Set character width  (default: 4)
+        // y -- Set character height (default: 6)
+        if ("123456789cghjsxy".indexOf(command) >= 0) {
+          // Check parameter for some commands;
+          // Valid parameter should be a number or lower case character (maybe)
+          if ('c' === command || 'j' === command || 's' === command) {
+            if (!isValidEscapeParam(p0CharCode)) break;
+            params += p0;
+            if ('j' === command) {
+              if (!isValidEscapeParam(p1CharCode)) break;
+              params += p1;
+            }
+          } else index--;
+
+          return '\\^' + command + params;
+        }
+    }
+    return null;
   }
 
   // Comments begin with -- after which it will be decided if they are
@@ -1656,6 +1648,10 @@
     return 10 === charCode || 13 === charCode;
   }
 
+  function isStringQuote(charCode) {
+    return 39 === charCode || 34 === charCode;
+  }
+
   function isDecDigit(charCode) {
     return charCode >= 48 && charCode <= 57;
   }
@@ -1666,6 +1662,15 @@
 
   function isBinDigit(charCode) {
     return 48 === charCode || 49 === charCode;
+  }
+
+  // This is used in the `readEscapeSequence()` function when the `feature.p8scii`
+  // is enabled. It asserts that the given character (pX and its charCode pXCharCode)
+  // following certain escape sequences is a valid P0/P1.
+
+  function isValidEscapeParam(charCode) {
+    // Valid parameter should be a number or lower case character (maybe)
+    return charCode >= 48 && charCode <= 57 || charCode >= 97 && charCode <= 122;
   }
 
   // From [Lua 5.2](http://www.lua.org/manual/5.2/manual.html#8.1) onwards
@@ -2308,10 +2313,8 @@
     if (options.scope) destroyScope();
 
     // Single line 'while' cannot be empty.
-    if (mustBeSingleLineWhile) {
-      if (0 === body.length)
-        return raise(token, errors.expected, '<body>', tokenValue(token));
-    }
+    if (mustBeSingleLineWhile && 0 === body.length)
+      return raise(token, errors.expected, '<body>', tokenValue(token));
 
     if (!consumeEnd()) expect('end');
     return finishNode(ast.whileStatement(condition, body));
@@ -2412,9 +2415,7 @@
     clauses.push(finishNode(ast.ifClause(condition, body)));
 
     // Single line 'if' does not accept 'elseif' clause.
-    if (mustBeSingleLineIf)
-      if ('elseif' === token.value) unexpected('elseif');
-      // (`consume('elseif')` would make an erroneous error message)
+    if (mustBeSingleLineIf && 'elseif' === token.value) unexpected('elseif');
 
     if (trackLocations) marker = createLocationMarker();
     while (consume('elseif')) {
@@ -2444,14 +2445,11 @@
       clauses.push(finishNode(ast.elseClause(body)));
     }
 
-    // Single line 'if' cannot be empty.
-    if (mustBeSingleLineIf) {
-      // But:
-      //    - if an 'else' clause is present, then it is ok (even if both are empty)
-      //    - if the 'if' clause is closed by a proper 'end', then it may be empty
-      if (0 === clauses[0].body.length && 1 === clauses.length && 'end' !== token.value)
-        return raise(token, errors.expected, '<body>', tokenValue(token));
-    }
+    // Single line 'if' cannot be empty, except:
+    //    - if an 'else' clause is present, then it is ok (even if both are empty)
+    //    - if the 'if' clause is closed by a proper 'end', then it may be empty
+    if (mustBeSingleLineIf && 0 === clauses[0].body.length && 1 === clauses.length && 'end' !== token.value)
+      return raise(token, errors.expected, '<body>', tokenValue(token));
 
     if (!consumeEnd()) expect('end');
     return finishNode(ast.ifStatement(clauses));
