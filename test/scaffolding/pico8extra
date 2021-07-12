@@ -1,7 +1,7 @@
 // !singleLinePrint
 ?a,1,2                                  -- FAIL
 
-// { "luaVersion": "PICO-8-0.2.1" }
+// { "luaVersion": "PICO-8-0.2.1", "ignoreStrictP8FileFormat": true }
 // singleLinePrint
 ?@n@
 ?"coucou"@n@

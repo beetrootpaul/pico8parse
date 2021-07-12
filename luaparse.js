@@ -91,7 +91,7 @@
     // This option should be reserved for testing but may be use if needed;
     // it overrides the `strictP8FileFormat` feature, making it possible to parse
     // snippets lacking the proper header and sections
-    , ignoreStrictP8FileFormat: true // TODO: change it to 'false' and edit tests
+    , ignoreStrictP8FileFormat: false
   };
 
   function encodeUTF8(codepoint, highMask) {
@@ -730,7 +730,7 @@
     skipWhiteSpace();
 
     if (features.strictP8FileFormat)
-      while ('__lua__' !== currentP8Section)
+      while ('__lua__' !== currentP8Section && index < length)
         skipP8Section();
 
     var charCode = input.charCodeAt(index)
@@ -1560,6 +1560,9 @@
   //
   // If the feature `traditionalComments` is on, this kind of comment cannot
   // be multiline.
+  //
+  // If the feature `noDeepLongStringComments` is on, a sequence like '--[=*['
+  // does not start a multiline comment.
 
   function scanComment() {
     var canBeMultiline = '-' === input.charAt(index);
@@ -1622,6 +1625,10 @@
     while ('=' === input.charAt(index + level)) ++level;
     // Exit, this is not a long string afterall.
     if ('[' !== input.charAt(index + level)) return false;
+
+    // Exit, this cannot be a longstring comment.
+    if (isComment && features.noDeepLongStringComments && 0 !== level)
+      return false;
 
     index += level + 1;
 
@@ -2432,11 +2439,12 @@
     //  - no character before statement
     //  - character before statement is whitespace or lineterminator
     if (canBeSingleLineIf /*&& true !== newLineIsEnd*/) {
-      canBeSingleLineIf = !previousToken || NumericLiteral === previousToken.type || 0 === token.range[0];
+      var startIndex = token.range[0];
+      canBeSingleLineIf = !previousToken || NumericLiteral === previousToken.type || 0 === startIndex;
       // If the previous token is not a numeral (or beginning of stream), scan 1 character
       // past the previous token expecting a blank character (whitespace or lineterminator)
       if (!canBeSingleLineIf) {
-        var previousCharCode = input.charCodeAt(previousToken.range[1]);
+        var previousCharCode = input.charCodeAt(startIndex-1);
         canBeSingleLineIf = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
       }
     }
@@ -3251,7 +3259,7 @@
       // The PICO-8 file format (.p8, text) defines a set of rules that must be followed
       // for a file to be correctly loaded:
       //
-      //    - the first line of the file must contain the mention "pico-8 cartridges"
+      //    - the first line of the file must contain the mention "pico-8 cartridge"
       //      (17 characters, case sensitive) any character may be present before and
       //      after (no new-line sequence before, obviously)
       //
@@ -3265,7 +3273,7 @@
       //    - these sequences are only valid section opening if they are present at
       //      the very beginning of the line; any amount of any character may follow
       //
-      //    - outside of section (typically right after the "pico-8 cartridges" header,
+      //    - outside of section (typically right after the "pico-8 cartridge" header,
       //      before any sequence), lines are simply discarded
       //
       //    - as a section is closed by a new one, multiple section under the same sequence
@@ -3353,6 +3361,7 @@
       assignmentOperators: true,  // a += b
       traditionalNotEqual: true,  // a != b
       traditionalComments: true,  // '//' is a comment (this would take precedence on the int div)
+      noDeepLongStringComments: true, // '--[=*[' does not start a multiline (longstring) comment
       bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
       peekPokeOperators: true,    // @a   %a   $a
       backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above), same about assignment operators)
@@ -3460,28 +3469,29 @@
 
     if (!features.strictP8FileFormat) {
       // Ignore shebangs.
-      if (input && input.substr(0, 2) === '#!') {
+      if (input && input.substr(0, 2) === '#!')
         while (!isLineTerminator(input.charCodeAt(++index)));
-        line++;
+    } else {
+      if (!options.ignoreStrictP8FileFormat) {
+        // Check for header
+        index = input.indexOf("pico-8 cartridge")
+        if (index < 0) raise(null, errors.expected, "pico-8 cartridge", '<bof>');
+        index += 16;
+        // Ignore until first valid p8Section
+        var match;
+        do {
+          match = input.slice(++index).match(/^__.*?__/m);
+          if (null === match) break;
+          index += match.index;
+          currentP8Section = scanP8SectionStart();
+        } while (null === currentP8Section);
+        // Reaching the end of stream before finding anything is fine (content is just discarded)
+        if (!match) index = input.length;
+        // Count any newline that was passed (minus the one that was counted by `scanP8SectionStart()`)
+        else line += input.slice(0, index).split('\n').length-2;
       }
-    } else if (!options.ignoreStrictP8FileFormat) {
-      // Check for header
-      index = input.indexOf("pico-8 cartridges")
-      if (index < 0) raise(null, errors.expected, "pico-8 cartridges", '<bof>');
-      index += 16;
-      // Ignore until first valid p8Section
-      var match;
-      do {
-        match = input.slice(++index).match(/^__.*?__/m);
-        if (null === match) break;
-        index += match.index;
-        currentP8Section = scanP8SectionStart();
-      } while (null === currentP8Section);
-      // Reaching the end of stream before finding anything is fine (content is just discarded)
-      if (!match) index = input.length;
-      // Count any newline that was passed (minus the one that was counted by `scanP8SectionStart()`)
-      else line += input.slice(0, index).split('\n').length-2;
-    } /* istanbul ignore else */ else currentP8Section = '__lua__';
+      if (!currentP8Section) currentP8Section = '__lua__';
+    }
 
     length = input.length;
     trackLocations = options.locations || options.ranges;

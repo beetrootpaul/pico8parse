@@ -25,7 +25,7 @@ while 1 do do break end end
 while 1 do ; end
 while 1 do break break end
 
-// { "luaVersion": "PICO-8-0.2.1" }
+// { "luaVersion": "PICO-8-0.2.1", "ignoreStrictP8FileFormat": true }
 // singleLineWhile
 //// only the basic tests, for more advanced see the singleLineIf
 //// as they essentially are implemented using the same algorithm
