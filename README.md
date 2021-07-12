@@ -249,6 +249,7 @@ instr()--[[]]--[[]]if (cdt) instr()
 -- valid
 instr() --[[]]if (cdt) instr()
 instr()--[[]] if (cdt) instr()
+instr() --[[]]--[[]]if (cdt) instr()
 a = 0xf--[[]]if (cdt) instr()
 ```
 

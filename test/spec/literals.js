@@ -6060,36 +6060,6 @@
       }
     },
     {
-      "source": "",
-      "result": {
-        "type": "Chunk",
-        "body": [],
-        "loc": {
-          "start": {
-            "line": 1,
-            "column": 0
-          },
-          "end": {
-            "line": 1,
-            "column": 0
-          }
-        },
-        "range": [
-          0,
-          0
-        ],
-        "comments": [],
-        "globals": []
-      },
-      "options": {
-        "comments": true,
-        "locations": true,
-        "ranges": true,
-        "scope": true,
-        "luaVersion": "LuaJIT"
-      }
-    },
-    {
       "source": "a = 1..3..-2",
       "result": "[1:6] unexpected number '.3' near '..'",
       "options": {
@@ -6103,36 +6073,6 @@
     {
       "source": "a = 1..\"bar\"",
       "result": "[1:6] unexpected symbol '.' near '\"bar\"'",
-      "options": {
-        "comments": true,
-        "locations": true,
-        "ranges": true,
-        "scope": true,
-        "luaVersion": "LuaJIT"
-      }
-    },
-    {
-      "source": "",
-      "result": {
-        "type": "Chunk",
-        "body": [],
-        "loc": {
-          "start": {
-            "line": 1,
-            "column": 0
-          },
-          "end": {
-            "line": 1,
-            "column": 0
-          }
-        },
-        "range": [
-          0,
-          0
-        ],
-        "comments": [],
-        "globals": []
-      },
       "options": {
         "comments": true,
         "locations": true,
@@ -6248,7 +6188,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6259,7 +6200,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6369,7 +6311,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6479,7 +6422,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6589,7 +6533,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6699,7 +6644,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6809,7 +6755,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6820,7 +6767,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6831,7 +6779,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6842,7 +6791,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6853,7 +6803,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6864,7 +6815,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6875,7 +6827,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6886,7 +6839,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6897,7 +6851,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6908,7 +6863,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6919,7 +6875,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6930,7 +6887,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6941,7 +6899,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6952,7 +6911,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6963,7 +6923,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6974,7 +6935,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6985,7 +6947,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     },
     {
@@ -6996,7 +6959,8 @@
         "locations": true,
         "ranges": true,
         "scope": true,
-        "luaVersion": "PICO-8-0.2.1"
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
       }
     }
   ];
