@@ -126,7 +126,7 @@ $_targets = @{
     'qa' = [DependsOn]::new(@('test', 'lint', 'complexity-analysis', 'coverage-analysis'))
 
     'clean' = {
-        if (Test-Path $folder) { Remove-Item -Force docs/*.html }
+        if (Test-Path .\docs\) { Remove-Item -Force .\docs\*.html }
         foreach ($it in @('lib-cov', 'coverage', 'html-report', 'docs/coverage/')) {
             if (Test-Path $it) { Remove-Item -Recurse -Force $it }
         }
