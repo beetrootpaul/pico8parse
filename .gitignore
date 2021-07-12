@@ -7,3 +7,4 @@ dist
 logs
 components
 npm-debug.log
+.vscode/
