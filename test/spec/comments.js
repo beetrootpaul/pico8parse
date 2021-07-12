@@ -621,7 +621,7 @@
         "comments": [
           {
             "type": "Comment",
-            "value": "comment\nline two\n",
+            "value": "\ncomment\nline two\n",
             "raw": "--[[\ncomment\nline two\n]]",
             "loc": {
               "start": {
