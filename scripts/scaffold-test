@@ -180,7 +180,7 @@ args.forEach(function(arg, index) {
     fs.readFileSync(arg, 'utf8')
       .split("\n")
       .forEach(function(snippet) {
-        snippet = snippet.replace("\r", '')
+        snippet = snippet.replace("\r", '');
         if (!snippet.length) return;
         snippets.push(snippet);
       });

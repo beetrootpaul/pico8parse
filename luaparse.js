@@ -383,18 +383,22 @@
       };
     }
 
-    , literal: function(type, value, raw) {
+    // `rawInterrupted`: when a longstring was interrupted by other section(s),
+    // contains the actual content seen as raw in PICO-8 Lua.
+    , literal: function(type, value, raw, rawInterrupted) {
       type = (type === StringLiteral) ? 'StringLiteral'
         : (type === NumericLiteral) ? 'NumericLiteral'
         : (type === BooleanLiteral) ? 'BooleanLiteral'
         : (type === NilLiteral) ? 'NilLiteral'
         : 'VarargLiteral';
 
-      return {
+      var r = {
           type: type
         , value: value
         , raw: raw
       };
+      if (rawInterrupted) r.rawInterrupted = rawInterrupted;
+      return r;
     }
 
     , tableKey: function(key, value) {
@@ -486,12 +490,16 @@
       };
     }
 
-    , comment: function(value, raw) {
-      return {
+    // `rawInterrupted`: when a longstring was interrupted by other section(s),
+    // contains the actual content seen as raw in PICO-8 Lua.
+    , comment: function(value, raw, rawInterrupted) {
+      var r = {
           type: 'Comment'
         , value: value
         , raw: raw
       };
+      if (rawInterrupted) r.rawInterrupted = rawInterrupted;
+      return r;
     }
   };
 
@@ -839,7 +847,7 @@
       while (isLineTerminator(input.charCodeAt(index))) consumeEOL();
       if (isLineTerminator(input.charCodeAt(index-1)) && '_' === input.charAt(lineStart)) {
         sequence = scanP8SectionStart();
-        if (sequence) break;
+        if (null !== sequence) break;
       }
       index++;
     }
@@ -913,7 +921,9 @@
     };
   }
 
-  // Will also consume until the next EOL/EOF and increase line accordingly
+  // Will also consume until the next EOL/EOF and increase line accordingly.
+  // It should be ensured when this is called that this can indeed be a valid p8
+  // section start (specifically must be preceeded by an EOL)
 
   function scanP8SectionStart() {
     for (var k = 0; k < features.p8Sections.length; k++) {
@@ -1130,7 +1140,7 @@
     // Fail if it's not a multiline literal.
     if (false === string) raise(token, errors.expected, '[', tokenValue(token));
 
-    return {
+    var r = {
         type: StringLiteral
       , value: encodingMode.discardStrings ? null : encodingMode.fixup(string)
       , line: beginLine
@@ -1139,6 +1149,21 @@
       , lastLineStart: lineStart
       , range: [tokenStart, index]
     };
+
+    if (features.strictP8FileFormat) {  //      v
+      var delimLength = tokenStart + 1; // a = [==[content]==]
+      while ('[' !== input.charAt(delimLength)) delimLength++;
+      delimLength = delimLength-tokenStart + 1;
+      // This can only be true when a longstring was interrupted by one (or more)
+      // non-lua sections; but in this case, 'raw' of the node is not really
+      // the slice of input defined by the range... _somehow_
+      if (string.length !== index - tokenStart - 2*delimLength)
+        r.rawInterrupted = input.slice(tokenStart, tokenStart + delimLength) +
+                           string +
+                           input.slice(index - delimLength, index);
+    }
+
+    return r;
   }
 
   // Numeric literals will be returned as floating-point numbers instead of
@@ -1592,7 +1617,21 @@
     }
 
     if (options.comments) {
-      var node = ast.comment(content, input.slice(tokenStart, index));
+      var rawInterrupted;
+      if (isLong && features.strictP8FileFormat) {  //    v
+        var delimLength = tokenStart + 3;           // --[==[comment]==]
+        while ('[' !== input.charAt(delimLength)) delimLength++;
+        delimLength = delimLength-(tokenStart+2) + 1;
+        // This can only be true when a longstring was interrupted by one (or more)
+        // non-lua sections; but in this case, 'raw' of the node is not really
+        // the slice of input defined by the range... _somehow_
+        if (content.length !== index - tokenStart - 2*delimLength-2) // -2 here and +2 bellow: the '--'
+          rawInterrupted = input.slice(tokenStart, tokenStart + delimLength+2) +
+                           content +
+                           input.slice(index - delimLength, index);
+      }
+
+      var node = ast.comment(content, input.slice(tokenStart, index), rawInterrupted);
 
       // `Marker`s depend on tokens available in the parser and as comments are
       // intercepted in the lexer all location data is set manually.
@@ -1617,7 +1656,11 @@
     var level = 0
       , content = ''
       , terminator = false
-      , character, stringStart, firstLine = line;
+      , character, stringStart, firstLine = line
+      , sequence
+      , interruptions = []
+      , interruptionStartIndex = index
+      , interruptionRange;
 
     ++index; // [
 
@@ -1643,6 +1686,29 @@
 
       character = input.charAt(index++);
 
+      if (features.strictP8FileFormat && '_' === character &&
+          isLineTerminator(input.charCodeAt(index-2))) {
+        interruptionStartIndex = --index;
+        sequence = scanP8SectionStart();
+        if (null !== sequence) {
+          currentP8Section = sequence;
+          // Note: if at this point, even if the `currentP8Section` is still '__lua__',
+          // it is indeed discarded (ie. in a longstring, a line cannot start with
+          // any sequence from the `features.p8Sections`)
+          while ('__lua__' !== currentP8Section && index < length) {
+            skipP8Section();
+            // The lua section is interrupted
+            if (interruptionStartIndex !== index)
+              interruptionRange = [interruptionStartIndex, index];
+          }
+          if (isArray(interruptionRange)) {
+            interruptions.push(interruptionRange);
+            interruptionRange = undefined;
+            character = input.charAt(index++);
+          }
+        } else index++; // Fausse alerte
+      }
+
       // Once the delimiter is found, iterate through the depth count and see
       // if it matches.
       if (']' === character) {
@@ -1655,7 +1721,18 @@
 
       // We reached the end of the multiline string. Get out now.
       if (terminator) {
-        content += input.slice(stringStart, index - 1);
+        if (!features.strictP8FileFormat)
+          content += input.slice(stringStart, index - 1);
+        else {
+          // Need to discard everything between indexes interruptions[k][0] and
+          // interruptions[k][1] as it is part of some other(s) section(s).
+          var jumpingIndex = stringStart;
+          for (var k = 0; k < interruptions.length; k++) {
+            content += input.slice(jumpingIndex, interruptions[k][0]);
+            jumpingIndex = interruptions[k][1];
+          }
+          content += input.slice(jumpingIndex, index - 1);
+        }
         index += level + 1;
         return content;
       }
@@ -3176,9 +3253,10 @@
 
     if (type & literals) {
       pushLocation(marker);
-      var raw = input.slice(token.range[0], token.range[1]);
+      var raw = input.slice(token.range[0], token.range[1])
+        , rawInterrupted = token.rawInterrupted;
       next();
-      return finishNode(ast.literal(type, value, raw));
+      return finishNode(ast.literal(type, value, raw, rawInterrupted));
     } else if (Keyword === type && 'function' === value) {
       pushLocation(marker);
       next();
@@ -3262,6 +3340,9 @@
       //    - the first line of the file must contain the mention "pico-8 cartridge"
       //      (17 characters, case sensitive) any character may be present before and
       //      after (no new-line sequence before, obviously)
+      //
+      //    - the next line is entirely ignored (may it contain one of the sequences
+      //      specified after, it is not parsed and is discarded)
       //
       //    - there exists (as of 0.2.2) 7 sections in a p8 file each identified by a set
       //      sequence of character (similar to Python's dunders) from the list bellow
@@ -3470,13 +3551,17 @@
     if (!features.strictP8FileFormat) {
       // Ignore shebangs.
       if (input && input.substr(0, 2) === '#!')
-        while (!isLineTerminator(input.charCodeAt(++index)));
+        while (index < length && !isLineTerminator(input.charCodeAt(++index)));
     } else {
       if (!options.ignoreStrictP8FileFormat) {
         // Check for header
-        index = input.indexOf("pico-8 cartridge")
+        index = input.indexOf("pico-8 cartridge");
         if (index < 0) raise(null, errors.expected, "pico-8 cartridge", '<bof>');
         index += 16;
+        // Ignore the header line
+        while (index < length && !isLineTerminator(input.charCodeAt(++index)));
+        // Ignore the following line
+        while (index < length && !isLineTerminator(input.charCodeAt(index))) index++;
         // Ignore until first valid p8Section
         var match;
         do {

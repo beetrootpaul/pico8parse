@@ -1,15 +1,21 @@
 // !strictP8FileFormat
-pico-8 cartridge@n@content                                     -- FAIL
+pico-8 cartridge@n@@n@content                                       -- FAIL
 
 // { "luaVersion": "PICO-8" }
 // strictP8FileFormat
-pico-8 cartridge@n@content
- pico-8 cartridge@n@content
-blablapico-8 cartridgeblabla@n@content
-pico-8 cartridg@n@content                                      -- FAIL
-pico 8 cartridge@n@content                                     -- FAIL
-pico-8 cartridge@n@__gfx__@n@invalid lua
-pico-8 cartridge@n@__lua__@n@invalid lua                       -- FAIL
-pico-8 cartridge@n@__lua__invalid lua@n@
-pico-8 cartridge@n@__lua__@n@a = @n@__gfx__@n@__lua__@n@       -- FAIL
-pico-8 cartridge@n@__lua__@n@a = @n@__gfx__@n@__lua__@n@0
+pico-8 cartridge@n@@n@content
+ pico-8 cartridge@n@@n@content
+blablapico-8 cartridgeblabla@n@@n@content
+pico-8 cartridg@n@@n@content                                        -- FAIL
+pico 8 cartridge@n@@n@content                                       -- FAIL
+pico-8 cartridge@n@@n@__gfx__@n@invalid lua
+pico-8 cartridge@n@@n@__lua__@n@invalid lua                         -- FAIL
+pico-8 cartridge@n@@n@__lua__invalid lua@n@
+pico-8 cartridge@n@@n@__lua__@n@a = @n@__gfx__@n@__lua__@n@         -- FAIL
+pico-8 cartridge@n@@n@__lua__@n@a = @n@__gfx__@n@__lua__@n@0
+pico-8 cartridge@n@__lua__@n@a = @n@__lua__@n@0                     -- FAIL
+pico-8 cartridge@n@__lua__@n@a = [[@n@__gfx__]]@n@__lua__@n@]]      -- FAIL
+pico-8 cartridge@n@@n@__lua__@n@a = [[@n@__gfx__]]@n@__lua__@n@]]
+pico-8 cartridge@n@@n@__lua__@n@a = [[@n@ __gfx__]]@n@__lua__@n@]]  -- FAIL
+pico-8 cartridge@n@@n@__lua__@n@--[[@n@__gfx__]]@n@__lua__@n@]]
+pico-8 cartridge@n@@n@__lua__@n@--[[@n@ __gfx__]]@n@__lua__@n@]]    -- FAIL
