@@ -80,18 +80,21 @@ $_targets = @{
     # -------------
     'docs' = [DependsOn]::new(@('coverage', 'docs-test', 'docs-md'))
     'docs-index' = {
-        Get-Content .\docs\layout\head.html           > .\docs\index.html
-        & .\$BIN\marked.ps1 README-luaparse.md --gfm >> .\docs\index.html
-        Get-Content .\docs\layout\foot.html          >> .\docs\index.html
+        Get-Content .\docs\layout\head.html  > .\docs\index.html
+        & .\$BIN\marked.ps1 README.md --gfm >> .\docs\index.html
+        Get-Content .\docs\layout\foot.html >> .\docs\index.html
     }
     'docs-md' = [DependsOn]::new(@('docs-index')).Then({
         Get-Item .\docs\*.md | ForEach-Object {
             $FILE = $_.BaseName
             Invoke-Target '%.html'
         }
-        Get-Content .\docs\layout\head.html  > .\docs\fork.html
-        & .\$BIN\marked.ps1 README.md --gfm >> .\docs\fork.html
-        Get-Content .\docs\layout\foot.html >> .\docs\fork.html
+        Get-Content .\docs\layout\head.html           > .\docs\upstream.html
+        & .\$BIN\marked.ps1 README-luaparse.md --gfm >> .\docs\upstream.html
+        Get-Content .\docs\layout\foot.html          >> .\docs\upstream.html
+        Get-Content .\docs\layout\head.html             > .\docs\fork.html
+        & .\$BIN\marked.ps1 README-pico8parse.md --gfm >> .\docs\fork.html
+        Get-Content .\docs\layout\foot.html            >> .\docs\fork.html
     })
     '%.html' = {
         Get-Content .\docs\layout\head.html        > .\docs\$FILE.html
