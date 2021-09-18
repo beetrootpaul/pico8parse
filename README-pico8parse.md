@@ -16,13 +16,14 @@ The values added for the parser `luaVersion` option are:
 
 These changes (specific to PICO-8's Lua) have been considered out of scope:
 
- - no `return` statement in global scope, likely due to the fact that "global" scope does not seem to end on EOF
- - the last statement of a file may be an unfinished `variables` parts of an `AssignmentStatement` node, for example `local a,`
+ - the `#include ..` directive
+ - edge cases like ending the `__lua__` section with `local a,`
 
 Differences with the official interpreter for PICO-8 version 0.2.1:
 
  - "preprocessor can not handle form `::_::a+=1`" (gives a funny `syntax error expected near '+'`)
- - "preprocessor: self assignment with quoted function calls on RHS `a+=1+cos"0"`" (`runtme error attempt to perform arithmetic on global 'cos' [...]`)
+ - "preprocessor: self assignment with quoted function calls on RHS `a+=1+cos"0"`" (`runtime error attempt to perform arithmetic on global 'cos' [...]`)
+ - ... and other unexpected behaviors (mainly around `+=` and such, stare at PICO-8's changelogs for more of these)
 
 ### Comments
 

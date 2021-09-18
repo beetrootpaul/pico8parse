@@ -170,7 +170,7 @@
       }
     },
 
-    // `none` encoding mode: disregard intrepretation of string literals, leave identifiers as-is
+    // `none` encoding mode: disregard interpretation of string literals, leave identifiers as-is
     'none': {
       discardStrings: true,
       fixup: function (s) {
@@ -781,7 +781,7 @@
   }
 
   // Whitespace has no semantic meaning in lua so simply skip ahead while
-  // tracking the encounted newlines. Any kind of eol sequence is counted as a
+  // tracking the encountered newlines. Any kind of eol sequence is counted as a
   // single line.
 
   function consumeEOL() {
@@ -802,7 +802,7 @@
 
   function consumeEOF() {
     // From a single line statement, any dangling `isEnd.newLineIsEnd`
-    // makes the EOF a valid 'end' token, but this is not optionnal
+    // makes the EOF a valid 'end' token, but this is not optional
     // and will be an syntax error under certain circumstances.
     if (isEnd.newLineIsEnd && token && EOF === token.type) {
       isEnd.newLineIsEnd = false;
@@ -861,12 +861,12 @@
 
   // XXX: (move to appropriate doc please)
   // Lua PICO-8 introduced 3 (janky) whitespace-dependent syntaxes: singleLineIf,
-  // singleLineWhile and singleLinePrint. While they all require an ending newline,
+  // singleLineWhile and singleLinePrint (P.S. and #include). While they all require an ending newline,
   // singleLineIf and singleLineWhile may start with any blank character, singleLinePrint
   // must be on its own line (so starts with a newline sequence).
   //
   // singleLineIf and singleLineWhile actually have a more complicated relation with
-  // leading blank character; if the token preceeding the 'if' or 'while' keyword is
+  // leading blank character; if the token preceding the 'if' or 'while' keyword is
   // a numeral (not just a digit character, hex is fine too) then the blank character
   // is not necessary (notice how 7 to 10 behave):
   //
@@ -899,7 +899,7 @@
   function scanIdentifierOrKeyword() {
     var value, type;
 
-    // Slicing the input string is prefered before string concatenation in a
+    // Slicing the input string is preferred before string concatenation in a
     // loop for performance reasons.
     while (isIdentifierPart(input.charCodeAt(++index)));
     value = encodingMode.fixup(input.slice(tokenStart, index));
@@ -928,7 +928,7 @@
 
   // Will also consume until the next EOL/EOF and increase line accordingly.
   // It should be ensured when this is called that this can indeed be a valid p8
-  // section start (specifically must be preceeded by an EOL)
+  // section start (specifically must be preceded by an EOL)
 
   function scanP8SectionStart() {
     for (var k = 0; k < features.p8Sections.length; k++) {
@@ -1064,7 +1064,7 @@
 
   // If the reached punctuator can also be the beginning of an assignment
   // operators (and if they are enabled in the features) this tests for the
-  // ending '='; if such is found the punctuator is 1 longer, otherwize
+  // ending '='; if such is found the punctuator is 1 longer, otherwise
   // defaults to `scanPunctuator()`.
 
   function scanPunctuatorMaybeAssignmentOperator(valuePunctuator) {
@@ -1248,7 +1248,7 @@
   }
 
   // Lua hexadecimals have an optional fraction part and an optional binary
-  // exoponent part. These are not included in JavaScript so we will compute
+  // exponent part. These are not included in JavaScript so we will compute
   // all three parts separately and then sum them up at the end of the function
   // with the following algorithm.
   //
@@ -1885,7 +1885,7 @@
     if (Punctuator === token.type && '=' === token.value.charAt(token.value.length-1)) {
       // Most common
       if ('<=' === token.value || '>=' === token.value) return false;
-      // Feature independants
+      // Feature independents
       if (indexOf(['+=', '-=', '*=', '/=', '%=', '^=', '..='], token.value) >= 0) return true;
       // Least common
       return indexOf([
@@ -1992,7 +1992,7 @@
     if (options.onDestroyScope) options.onDestroyScope();
   }
 
-  // Add identifier name to the current scope if it doesnt already exist.
+  // Add identifier name to the current scope if it doesn't already exist.
   function scopeIdentifierName(name) {
     if (options.onLocalDeclaration) options.onLocalDeclaration(name);
     if (-1 !== indexOf(scopes[scopeDepth], name)) return;
@@ -2332,7 +2332,7 @@
     // (prior to the 'if' or 'while' itself)
     //
     // The taken approach is to not `next()` before calling any handler
-    // (after all, the 'local' is part of the LocalStatment and so on...)
+    // (after all, the 'local' is part of the LocalStatement and so on...)
 
     if (Keyword === token.type) {
       switch (token.value) {
@@ -2457,7 +2457,7 @@
     } else expect('do');
 
     // No 'do' were found: the scope of the 'while' is implicitly opened
-    // and the very next EOL is syntaxically equivalent to a 'end'
+    // and the very next EOL is syntactically equivalent to a 'end'
     if (mustBeSingleLineWhile) isEnd.newLineIsEnd = true;
 
     if (options.scope) createScope();
@@ -2468,7 +2468,7 @@
 
     // Single line 'while' cannot be empty.
     if (mustBeSingleLineWhile && 0 === body.length)
-      return raise(token, errors.expected, '<body>', tokenValue(token));
+      raise(token, errors.expected, '<body>', tokenValue(token));
 
     if (!consumeEnd()) expect('end');
     return finishNode(ast.whileStatement(condition, body));
@@ -2558,7 +2558,7 @@
     } else expect('then');
 
     // No 'then' were found: the scope of the 'if' is implicitly opened
-    // and the very next EOL is syntaxically equivalent to a 'end'
+    // and the very next EOL is syntactically equivalent to a 'end'
     if (mustBeSingleLineIf) isEnd.newLineIsEnd = true;
 
     if (options.scope) createScope();
@@ -2603,7 +2603,7 @@
     //    - if an 'else' clause is present, then it is ok (even if both are empty)
     //    - if the 'if' clause is closed by a proper 'end', then it may be empty
     if (mustBeSingleLineIf && 0 === clauses[0].body.length && 1 === clauses.length && 'end' !== token.value)
-      return raise(token, errors.expected, '<body>', tokenValue(token));
+      raise(token, errors.expected, '<body>', tokenValue(token));
 
     if (!consumeEnd()) expect('end');
     return finishNode(ast.ifStatement(clauses));
@@ -2847,7 +2847,7 @@
 
     var assignmentOperator = false;
 
-    // Try to find the operator if this is realy an assignment operator statement
+    // Try to find the operator if this is really an assignment operator statement
     // XXX: not sure this should be done like this...
     if (features.assignmentOperators && isAssignmentOperator(token)) {
       assignmentOperator = token.value.slice(0, token.value.length-1);
@@ -3372,7 +3372,7 @@
       //      next line
       //
       //    - a __lua__ section may be closed at any point (eg. in the middle of an
-      //      assagnment) and resume in a next __lua__ section, this is still considered
+      //      assignment) and resume in a next __lua__ section, this is still considered
       //      valid
       //
       //    - _usually_, the first line is as bellow, the second line present a version
@@ -3464,13 +3464,13 @@
 
   // Expand the '_inherits' of each version (recursively).
 
-  /* istanbul ignore next */ function expandInherted(_versionId) {
+  /* istanbul ignore next */ function expandInherited(_versionId) {
     if ('undefined' !== typeof _versionId) {
       var features = versionFeatures[_versionId];
 
       if (Object.hasOwnProperty.call(features, '_inherits') && isArray(features._inherits)) {
         for (var k = 0; k < features._inherits.length; k++) {
-          var inherited = expandInherted(features._inherits[k]);
+          var inherited = expandInherited(features._inherits[k]);
           // Entries in "features" (child) will override inherited ones (that are in "inherited")
           features = assign({}, inherited, features);
         }
@@ -3484,10 +3484,10 @@
     // No version provided, expand all inplace
     for (var versionId in versionFeatures)
       if (Object.hasOwnProperty.call(versionFeatures, versionId))
-        versionFeatures[versionId] = expandInherted(versionId);
+        versionFeatures[versionId] = expandInherited(versionId);
   }
 
-  expandInherted();
+  expandInherited();
   exports.versionFeatures = versionFeatures;
 
   function parse(_input, _options) {
