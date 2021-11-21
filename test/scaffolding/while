@@ -31,6 +31,7 @@ while 1 do break break end
 //// as they essentially are implemented using the same algorithm
 //// (in the ./conditional)
 while (1)@n@                            -- FAIL
+while (1);@n@                           -- FAIL
 while (1) local a = 1@n@
 while (1) local a = 1
 while (1) do end
@@ -40,3 +41,7 @@ function f()while (1) local a = 1 end   -- FAIL
 function f()while (1) local a = 1@n@end -- FAIL
 function f() while (1) local a = 1@n@end
 while (1) end@n@                        -- FAIL
+
+// { "luaVersion": "PICO-8-0.2.3", "ignoreStrictP8FileFormat": true }
+// allowEmptySingleLine
+//while (1);@n@

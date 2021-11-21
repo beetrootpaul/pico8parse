@@ -84,7 +84,7 @@
     // The variable's name will be passed as the only parameter
     , onLocalDeclaration: null
     // The version of Lua targeted by the parser (string; allowed values are
-    // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2').
+    // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2', 'PICO-8-0.2.3').
     , luaVersion: '5.1'
     // Encoding mode: how to interpret code units higher than U+007F in input
     , encodingMode: 'none'
@@ -806,12 +806,12 @@
     // and will be an syntax error under certain circumstances.
     if (isEnd.newLineIsEnd && token && EOF === token.type) {
       isEnd.newLineIsEnd = false;
-      token = {
+      token = { // XXX: hacky?
           type: Keyword
         , value: 'end'
         , line: line
         , lineStart: lineStart
-        , range: [tokenStart, index]
+        , range: [index, index]
       };
     }
     return {
@@ -2466,9 +2466,10 @@
     flowContext.popScope();
     if (options.scope) destroyScope();
 
-    // Single line 'while' cannot be empty.
+    // Single line 'while' cannot be empty, except:
+    //    - if it contains a ';' (>= PICO-8-0.2.3)
     if (mustBeSingleLineWhile && 0 === body.length)
-      raise(token, errors.expected, '<body>', tokenValue(token));
+      raise(token, errors.expected, 'do', tokenValue(previousToken));
 
     if (!consumeEnd()) expect('end');
     return finishNode(ast.whileStatement(condition, body));
@@ -2602,8 +2603,12 @@
     // Single line 'if' cannot be empty, except:
     //    - if an 'else' clause is present, then it is ok (even if both are empty)
     //    - if the 'if' clause is closed by a proper 'end', then it may be empty
-    if (mustBeSingleLineIf && 0 === clauses[0].body.length && 1 === clauses.length && 'end' !== token.value)
-      raise(token, errors.expected, '<body>', tokenValue(token));
+    //    - if the 'if' clause contains a ';' (>= PICO-8-0.2.3)
+    if (mustBeSingleLineIf && 0 === clauses[0].body.length && 1 === clauses.length) {
+      var validEndToken = 'end' === token.value && index < length;
+      if (!validEndToken)
+        raise(token, errors.expected, 'then', tokenValue(previousToken));
+    }
 
     if (!consumeEnd()) expect('end');
     return finishNode(ast.ifStatement(clauses));
@@ -3455,11 +3460,16 @@
       backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above), same about assignment operators)
       smileyBitwiseXor: true      // a ^^ b (also disables a ~ b ie. **makes it invalid** (maybe), same about assignment operators)
     },
-    // NOTE: untested
     'PICO-8-0.2.2': {
       _inherits: ['PICO-8-0.2.1'],
-      p8scii: true     // additional string escape sequences
-    }
+      p8scii: true, // additional string escape sequences
+    },
+    'PICO-8-0.2.3': {
+      _inherits: ['PICO-8-0.2.2'],
+      // XXX: feature names...
+      singleLinePrintNoLineDependency: true, // actual behavior is to be tested more, but '?' shorthand can appear same line as an single line if/while
+      allowEmptySingleLine: true, // 'if' and 'while' single line syntax may be empty of statement using a ';'
+    },
   };
 
   // Expand the '_inherits' of each version (recursively).

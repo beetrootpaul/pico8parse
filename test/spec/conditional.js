@@ -2091,7 +2091,19 @@
     },
     {
       "source": "if (1)",
-      "result": "[1:6] '<body>' expected near '<eof>'",
+      "result": "[1:6] 'then' expected near ')'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "if (1);",
+      "result": "[1:7] 'then' expected near ';'",
       "options": {
         "comments": true,
         "locations": true,

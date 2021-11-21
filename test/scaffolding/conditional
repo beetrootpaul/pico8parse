@@ -32,6 +32,7 @@ if 1 then elseif then end               -- FAIL
 // { "luaVersion": "PICO-8-0.2.1", "ignoreStrictP8FileFormat": true }
 // singleLineIf
 if (1)@n@                               -- FAIL
+if (1);@n@                              -- FAIL
 if (1) local a = 1@n@
 if (1) local a = 1
 if (1) else@n@
@@ -77,3 +78,7 @@ a = ""--[[..]] if (a) print(a)
 //if (1) do local a = 1@n@end
 //if (1) local a = 0 do local b = 0@n@end
 //if (1) local a = 0 do local b = 0 end
+
+// { "luaVersion": "PICO-8-0.2.3", "ignoreStrictP8FileFormat": true }
+// allowEmptySingleLine
+//if (1);@n@

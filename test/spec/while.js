@@ -1181,7 +1181,19 @@
     },
     {
       "source": "while (1)",
-      "result": "[1:9] '<body>' expected near '<eof>'",
+      "result": "[1:9] 'do' expected near ')'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "while (1);",
+      "result": "[1:10] 'do' expected near ';'",
       "options": {
         "comments": true,
         "locations": true,
@@ -1871,7 +1883,7 @@
     },
     {
       "source": "while (1) end",
-      "result": "[1:10] '<body>' expected near 'end'",
+      "result": "[1:10] 'do' expected near ')'",
       "options": {
         "comments": true,
         "locations": true,

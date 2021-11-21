@@ -23,3 +23,13 @@ a = 2; ?a                               -- FAIL
 (?a)@n@                                 -- FAIL
 (?a@n@)                                 -- FAIL
 @n@?a@n@
+
+// { "luaVersion": "PICO-8-0.2.3", "ignoreStrictP8FileFormat": true }
+// singleLinePrintNoLineDependency
+//a() ?a
+//if (true) ?"yes"
+//?a a()                                  -- FAIL
+//??a                                     -- FAIL
+//// seriously?!
+//??a)
+//???a))
