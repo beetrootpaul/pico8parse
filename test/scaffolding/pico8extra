@@ -23,6 +23,8 @@ a = 2; ?a                               -- FAIL
 (?a)@n@                                 -- FAIL
 (?a@n@)                                 -- FAIL
 @n@?a@n@
+//// seriously?! :'
+//a.@n@?
 
 // { "luaVersion": "PICO-8-0.2.3", "ignoreStrictP8FileFormat": true }
 // singleLinePrintNoLineDependency
@@ -32,4 +34,6 @@ a = 2; ?a                               -- FAIL
 //??a                                     -- FAIL
 //// seriously?!
 //??a)
-//???a))
+//???a))                 -- " print( print( print( a)))"
+//?-?a)                  -- " print(- print(a))"
+//??a+?a))               -- " print( print(a+ print(a)))"

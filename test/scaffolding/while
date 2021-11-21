@@ -41,7 +41,12 @@ function f()while (1) local a = 1 end   -- FAIL
 function f()while (1) local a = 1@n@end -- FAIL
 function f() while (1) local a = 1@n@end
 while (1) end@n@                        -- FAIL
+//// bonus challenge!
+//while (1) while (2) do end            -- FAIL
+//while (1) if (2) then end
 
 // { "luaVersion": "PICO-8-0.2.3", "ignoreStrictP8FileFormat": true }
-// allowEmptySingleLine
-//while (1);@n@
+// allowEmptySingleLineWhile
+while (1)@n@                            -- FAIL
+while (1);@n@
+while (1);@n@local a = 1

@@ -2425,7 +2425,8 @@
 
   function parseWhileStatement(flowContext) {
     var canBeSingleLineWhile = features.singleLineWhile
-      , mustBeSingleLineWhile = false;
+      , mustBeSingleLineWhile = false
+      , canBeEmptySingleLineWhile = features.allowEmptySingleLineWhile;
 
     // Here it _can_ if either:
     //  - no dangling `newLineIsEnd` (not within a single line statement)
@@ -2457,8 +2458,12 @@
     } else expect('do');
 
     // No 'do' were found: the scope of the 'while' is implicitly opened
-    // and the very next EOL is syntactically equivalent to a 'end'
-    if (mustBeSingleLineWhile) isEnd.newLineIsEnd = true;
+    if (mustBeSingleLineWhile) {
+      // The very next EOL is syntactically equivalent to a 'end'
+      isEnd.newLineIsEnd = true;
+      // If the first token of the block is the punctuator ';', it can be the only statement
+      canBeEmptySingleLineWhile = canBeEmptySingleLineWhile && Punctuator === token.type && ';' === token.value;
+    }
 
     if (options.scope) createScope();
     flowContext.pushScope(true);
@@ -2468,7 +2473,7 @@
 
     // Single line 'while' cannot be empty, except:
     //    - if it contains a ';' (>= PICO-8-0.2.3)
-    if (mustBeSingleLineWhile && 0 === body.length)
+    if (mustBeSingleLineWhile && 0 === body.length && !canBeEmptySingleLineWhile)
       raise(token, errors.expected, 'do', tokenValue(previousToken));
 
     if (!consumeEnd()) expect('end');
@@ -2515,7 +2520,8 @@
 
   function parseIfStatement(flowContext) {
     var canBeSingleLineIf = features.singleLineIf
-      , mustBeSingleLineIf = false;
+      , mustBeSingleLineIf = false
+      , canBeEmptySingleLineIf = features.allowEmptySingleLineIf;
 
     // Here it _can_ if either:
     //  - no dangling `newLineIsEnd` (not within a single line statement)
@@ -2559,8 +2565,12 @@
     } else expect('then');
 
     // No 'then' were found: the scope of the 'if' is implicitly opened
-    // and the very next EOL is syntactically equivalent to a 'end'
-    if (mustBeSingleLineIf) isEnd.newLineIsEnd = true;
+    if (mustBeSingleLineIf) {
+      // The very next EOL is syntactically equivalent to a 'end'
+      isEnd.newLineIsEnd = true;
+      // If the first token of the block is the punctuator ';', it can be the only statement
+      canBeEmptySingleLineIf = canBeEmptySingleLineIf && Punctuator === token.type && ';' === token.value;
+    }
 
     if (options.scope) createScope();
     flowContext.pushScope();
@@ -2604,8 +2614,10 @@
     //    - if an 'else' clause is present, then it is ok (even if both are empty)
     //    - if the 'if' clause is closed by a proper 'end', then it may be empty
     //    - if the 'if' clause contains a ';' (>= PICO-8-0.2.3)
-    if (mustBeSingleLineIf && 0 === clauses[0].body.length && 1 === clauses.length) {
+    if (mustBeSingleLineIf && 0 === clauses[0].body.length && 1 === clauses.length && !canBeEmptySingleLineIf) {
       var validEndToken = 'end' === token.value && index < length;
+      // This last index check is because `consumeEOF` sends an artificial 'end' token in case
+      // of dangling `isEnd.newLineIsEnd`; though it does not count as a valid end here
       if (!validEndToken)
         raise(token, errors.expected, 'then', tokenValue(previousToken));
     }
@@ -3468,7 +3480,8 @@
       _inherits: ['PICO-8-0.2.2'],
       // XXX: feature names...
       singleLinePrintNoLineDependency: true, // actual behavior is to be tested more, but '?' shorthand can appear same line as an single line if/while
-      allowEmptySingleLine: true, // 'if' and 'while' single line syntax may be empty of statement using a ';'
+      allowEmptySingleLineIf: true, // 'if' single line syntax may be empty of statement using a ';'
+      allowEmptySingleLineWhile: true, // 'while' single line syntax may be empty of statement using a ';'
     },
   };
 
