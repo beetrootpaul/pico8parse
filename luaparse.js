@@ -1044,8 +1044,8 @@
         if (!features.singleLinePrint)
           break;
         // The '?' "operator" must be preceded by no token on the same
-        // line, otherwise it is not recognized.
-        if (token && token.line === line)
+        // line, otherwise it is not recognized (prior to PICO-8-0.2.3).
+        if (!features.singleLinePrintNoLineDependency && token && token.line === line)
           break;
         // The '?' token essentially correspond to 2 token directly
         // and 1 more later: the identifier 'print', a '(' punctuator

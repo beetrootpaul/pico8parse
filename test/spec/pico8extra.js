@@ -18,6 +18,10 @@
   exports.name = 'pico8extra';
   exports.spec = [
     {
+      "source": "?a",
+      "result": "[1:1] unexpected symbol '?' near '<bof>'"
+    },
+    {
       "source": "?a,1,2",
       "result": "[1:1] unexpected symbol '?' near '<bof>'"
     },
@@ -1888,6 +1892,1477 @@
         "ranges": true,
         "scope": true,
         "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "a.\n?",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "MemberExpression",
+                "indexer": ".",
+                "identifier": {
+                  "type": "Identifier",
+                  "name": "print",
+                  "loc": {
+                    "start": {
+                      "line": 2,
+                      "column": 0
+                    },
+                    "end": {
+                      "line": 2,
+                      "column": 0
+                    }
+                  },
+                  "range": [
+                    3,
+                    3
+                  ]
+                },
+                "base": {
+                  "type": "Identifier",
+                  "name": "a",
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 0
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 1
+                    }
+                  },
+                  "range": [
+                    0,
+                    1
+                  ],
+                  "isLocal": false
+                },
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "column": 0
+                  }
+                },
+                "range": [
+                  0,
+                  3
+                ]
+              },
+              "arguments": [],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 2,
+                  "column": 0
+                }
+              },
+              "range": [
+                0,
+                3
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 0
+              }
+            },
+            "range": [
+              0,
+              3
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 0
+          }
+        },
+        "range": [
+          0,
+          3
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "a() ?a",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              },
+              "arguments": [],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 3
+                }
+              },
+              "range": [
+                0,
+                3
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 3
+              }
+            },
+            "range": [
+              0,
+              3
+            ]
+          },
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "print",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 4
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 4
+                  }
+                },
+                "range": [
+                  4,
+                  4
+                ],
+                "isLocal": false
+              },
+              "arguments": [
+                {
+                  "type": "Identifier",
+                  "name": "a",
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 5
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 6
+                    }
+                  },
+                  "range": [
+                    5,
+                    6
+                  ],
+                  "isLocal": false
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 4
+                },
+                "end": {
+                  "line": 1,
+                  "column": 5
+                }
+              },
+              "range": [
+                4,
+                5
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 4
+              },
+              "end": {
+                "line": 1,
+                "column": 5
+              }
+            },
+            "range": [
+              4,
+              5
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 5
+          }
+        },
+        "range": [
+          0,
+          5
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          },
+          {
+            "type": "Identifier",
+            "name": "print",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 4
+              },
+              "end": {
+                "line": 1,
+                "column": 4
+              }
+            },
+            "range": [
+              4,
+              4
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "if (true) ?\"yes\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "IfStatement",
+            "clauses": [
+              {
+                "type": "IfClause",
+                "condition": {
+                  "type": "BooleanLiteral",
+                  "value": true,
+                  "raw": "true",
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 4
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 8
+                    }
+                  },
+                  "range": [
+                    4,
+                    8
+                  ]
+                },
+                "body": [
+                  {
+                    "type": "CallStatement",
+                    "expression": {
+                      "type": "CallExpression",
+                      "base": {
+                        "type": "Identifier",
+                        "name": "print",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 10
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 10
+                          }
+                        },
+                        "range": [
+                          10,
+                          10
+                        ],
+                        "isLocal": false
+                      },
+                      "arguments": [
+                        {
+                          "type": "StringLiteral",
+                          "value": null,
+                          "raw": "\"yes\"",
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 11
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 16
+                            }
+                          },
+                          "range": [
+                            11,
+                            16
+                          ]
+                        }
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 10
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 11
+                        }
+                      },
+                      "range": [
+                        10,
+                        11
+                      ]
+                    },
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 11
+                      }
+                    },
+                    "range": [
+                      10,
+                      11
+                    ]
+                  }
+                ],
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 11
+                  }
+                },
+                "range": [
+                  0,
+                  11
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 16
+              }
+            },
+            "range": [
+              0,
+              16
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 16
+          }
+        },
+        "range": [
+          0,
+          16
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "print",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 10
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              10,
+              10
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "?a a()",
+      "result": "[1:3] ')' expected near 'a'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "??a",
+      "result": "[1:3] ')' expected near '<eof>'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "??a)",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "print",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 0
+                  }
+                },
+                "range": [
+                  0,
+                  0
+                ],
+                "isLocal": false
+              },
+              "arguments": [
+                {
+                  "type": "CallExpression",
+                  "base": {
+                    "type": "Identifier",
+                    "name": "print",
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 1
+                      }
+                    },
+                    "range": [
+                      1,
+                      1
+                    ],
+                    "isLocal": false
+                  },
+                  "arguments": [
+                    {
+                      "type": "Identifier",
+                      "name": "a",
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 3
+                        }
+                      },
+                      "range": [
+                        2,
+                        3
+                      ],
+                      "isLocal": false
+                    }
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 4
+                    }
+                  },
+                  "range": [
+                    1,
+                    4
+                  ]
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 3
+                }
+              },
+              "range": [
+                0,
+                3
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 3
+              }
+            },
+            "range": [
+              0,
+              3
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 3
+          }
+        },
+        "range": [
+          0,
+          3
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "print",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 0
+              }
+            },
+            "range": [
+              0,
+              0
+            ],
+            "isLocal": false
+          },
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 2
+              },
+              "end": {
+                "line": 1,
+                "column": 3
+              }
+            },
+            "range": [
+              2,
+              3
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "???a))                 -- \" print( print( print( a)))\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "print",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 0
+                  }
+                },
+                "range": [
+                  0,
+                  0
+                ],
+                "isLocal": false
+              },
+              "arguments": [
+                {
+                  "type": "CallExpression",
+                  "base": {
+                    "type": "Identifier",
+                    "name": "print",
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 1
+                      }
+                    },
+                    "range": [
+                      1,
+                      1
+                    ],
+                    "isLocal": false
+                  },
+                  "arguments": [
+                    {
+                      "type": "CallExpression",
+                      "base": {
+                        "type": "Identifier",
+                        "name": "print",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 2
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 2
+                          }
+                        },
+                        "range": [
+                          2,
+                          2
+                        ],
+                        "isLocal": false
+                      },
+                      "arguments": [
+                        {
+                          "type": "Identifier",
+                          "name": "a",
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 3
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 4
+                            }
+                          },
+                          "range": [
+                            3,
+                            4
+                          ],
+                          "isLocal": false
+                        }
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 5
+                        }
+                      },
+                      "range": [
+                        2,
+                        5
+                      ]
+                    }
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 6
+                    }
+                  },
+                  "range": [
+                    1,
+                    6
+                  ]
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 23
+                }
+              },
+              "range": [
+                0,
+                23
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 23
+              }
+            },
+            "range": [
+              0,
+              23
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 23
+          }
+        },
+        "range": [
+          0,
+          23
+        ],
+        "comments": [
+          {
+            "type": "Comment",
+            "value": " \" print( print( print( a)))\"",
+            "raw": "-- \" print( print( print( a)))\"",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 23
+              },
+              "end": {
+                "line": 1,
+                "column": 54
+              }
+            },
+            "range": [
+              23,
+              54
+            ]
+          }
+        ],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "print",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 0
+              }
+            },
+            "range": [
+              0,
+              0
+            ],
+            "isLocal": false
+          },
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "line": 1,
+                "column": 4
+              }
+            },
+            "range": [
+              3,
+              4
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "?-?a)                  -- \" print(- print(a))\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "print",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 0
+                  }
+                },
+                "range": [
+                  0,
+                  0
+                ],
+                "isLocal": false
+              },
+              "arguments": [
+                {
+                  "type": "UnaryExpression",
+                  "operator": "-",
+                  "argument": {
+                    "type": "CallExpression",
+                    "base": {
+                      "type": "Identifier",
+                      "name": "print",
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 2
+                        }
+                      },
+                      "range": [
+                        2,
+                        2
+                      ],
+                      "isLocal": false
+                    },
+                    "arguments": [
+                      {
+                        "type": "Identifier",
+                        "name": "a",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 3
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 4
+                          }
+                        },
+                        "range": [
+                          3,
+                          4
+                        ],
+                        "isLocal": false
+                      }
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 2
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 5
+                      }
+                    },
+                    "range": [
+                      2,
+                      5
+                    ]
+                  },
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 5
+                    }
+                  },
+                  "range": [
+                    1,
+                    5
+                  ]
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 23
+                }
+              },
+              "range": [
+                0,
+                23
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 23
+              }
+            },
+            "range": [
+              0,
+              23
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 23
+          }
+        },
+        "range": [
+          0,
+          23
+        ],
+        "comments": [
+          {
+            "type": "Comment",
+            "value": " \" print(- print(a))\"",
+            "raw": "-- \" print(- print(a))\"",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 23
+              },
+              "end": {
+                "line": 1,
+                "column": 46
+              }
+            },
+            "range": [
+              23,
+              46
+            ]
+          }
+        ],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "print",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 0
+              }
+            },
+            "range": [
+              0,
+              0
+            ],
+            "isLocal": false
+          },
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 3
+              },
+              "end": {
+                "line": 1,
+                "column": 4
+              }
+            },
+            "range": [
+              3,
+              4
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "??a+?a))               -- \" print( print(a+ print(a)))\"",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "print",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 0
+                  }
+                },
+                "range": [
+                  0,
+                  0
+                ],
+                "isLocal": false
+              },
+              "arguments": [
+                {
+                  "type": "CallExpression",
+                  "base": {
+                    "type": "Identifier",
+                    "name": "print",
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 1
+                      }
+                    },
+                    "range": [
+                      1,
+                      1
+                    ],
+                    "isLocal": false
+                  },
+                  "arguments": [
+                    {
+                      "type": "BinaryExpression",
+                      "operator": "+",
+                      "left": {
+                        "type": "Identifier",
+                        "name": "a",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 2
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 3
+                          }
+                        },
+                        "range": [
+                          2,
+                          3
+                        ],
+                        "isLocal": false
+                      },
+                      "right": {
+                        "type": "CallExpression",
+                        "base": {
+                          "type": "Identifier",
+                          "name": "print",
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 4
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 4
+                            }
+                          },
+                          "range": [
+                            4,
+                            4
+                          ],
+                          "isLocal": false
+                        },
+                        "arguments": [
+                          {
+                            "type": "Identifier",
+                            "name": "a",
+                            "loc": {
+                              "start": {
+                                "line": 1,
+                                "column": 5
+                              },
+                              "end": {
+                                "line": 1,
+                                "column": 6
+                              }
+                            },
+                            "range": [
+                              5,
+                              6
+                            ],
+                            "isLocal": false
+                          }
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 4
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 7
+                          }
+                        },
+                        "range": [
+                          4,
+                          7
+                        ]
+                      },
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 2
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 7
+                        }
+                      },
+                      "range": [
+                        2,
+                        7
+                      ]
+                    }
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 8
+                    }
+                  },
+                  "range": [
+                    1,
+                    8
+                  ]
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 23
+                }
+              },
+              "range": [
+                0,
+                23
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 23
+              }
+            },
+            "range": [
+              0,
+              23
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 23
+          }
+        },
+        "range": [
+          0,
+          23
+        ],
+        "comments": [
+          {
+            "type": "Comment",
+            "value": " \" print( print(a+ print(a)))\"",
+            "raw": "-- \" print( print(a+ print(a)))\"",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 23
+              },
+              "end": {
+                "line": 1,
+                "column": 55
+              }
+            },
+            "range": [
+              23,
+              55
+            ]
+          }
+        ],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "print",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 0
+              }
+            },
+            "range": [
+              0,
+              0
+            ],
+            "isLocal": false
+          },
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 2
+              },
+              "end": {
+                "line": 1,
+                "column": 3
+              }
+            },
+            "range": [
+              2,
+              3
+            ],
+            "isLocal": false
+          }
+        ]
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
         "ignoreStrictP8FileFormat": true
       }
     }
