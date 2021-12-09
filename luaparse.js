@@ -731,8 +731,8 @@
     , line
     , lineStart
     , currentP8Section
-    //, newLineIsEnd // YYY: here
-    //, foundEndIsNewLine // YYY: here
+    , newLineIsEnd
+    , foundEndIsNewLine
     , newLineIsClose;
 
   exports.lex = lex;
@@ -805,12 +805,12 @@
   }
 
   function consumeEOF() {
-    // From a single line statement, any dangling `isEnd.newLineIsEnd`
+    // From a single line statement, any dangling `newLineIsEnd`
     // makes the EOF a valid 'end' token, but this is not optional
     // and will be an syntax error under certain circumstances.
-    if (isEnd.newLineIsEnd && token && EOF === token.type) {
-      isEnd.newLineIsEnd = false;
-      token = { // XXX: hacky?
+    if (newLineIsEnd && token && EOF === token.type) {
+      newLineIsEnd = false;
+      token = {
           type: Keyword
         , value: 'end'
         , line: line
@@ -833,13 +833,13 @@
   //  - isBlockFollow
   //  - isEnd
   //
-  // This will deal well enough with any dangling `isEnd.newLineIsEnd`.
+  // This will deal well enough with any dangling `newLineIsEnd`.
 
   function consumeEnd() {
     if (isEnd(token)) {
-      if (isEnd.foundEndIsNewLine) {
+      if (foundEndIsNewLine) {
         // "consumes" the newline (which sits between the previousToken and current token)
-        isEnd.newLineIsEnd = false;
+        newLineIsEnd = false;
         return true;
       }
       // Consumes an actual 'end' character sequence
@@ -1974,18 +1974,28 @@
   //
   // Prefer using something along
   //    if (!consumeEnd()) expect('end');
+  //
+  // The flag `newLineIsEnd` is set when a potential single line statement
+  // is encountered and trigger the `isEnd()` and `consumeEnd()`
+  // function to consider a newline character as a valid 'end' token.
+  //
+  // The flag `foundEndIsNewLine` is used in `consumeEnd()` to assess whether
+  // the found 'end' token was actually a newline character
+  // (in which case, reset `newLineIsEnd`, any next newline
+  // character should not be counted as 'end' token until told
+  // otherwise)
 
   function isEnd(token) {
-    isEnd.foundEndIsNewLine = false;
-    if (true === isEnd.newLineIsEnd) {
+    foundEndIsNewLine = false;
+    if (true === newLineIsEnd) {
       // If previousToken is not on the same line as the current token,
       // there is a newline sequence in between (and there can't be a token
       // between the 2).
       if (EOF === token.type || previousToken && token.line !== previousToken.line) {
         // In that case, this test is enough to say that a valid 'end' "token"
-        // was found (and passed! the `isEnd.foundEndIsNewLine` flag is set
+        // was found (and passed! the `foundEndIsNewLine` flag is set
         // not to discard the current token)
-        isEnd.foundEndIsNewLine = true;
+        foundEndIsNewLine = true;
         return true;
       }
     }
@@ -1993,24 +2003,6 @@
 
     return false;
   }
-
-  // No much clue where to put this, so it will lie as
-  // property to the related function so it is at least
-  // ease to see what it's meaning.
-
-  // This first flag is set when a potential single line statement
-  // is encountered and trigger the `isEnd()` and `consumeEnd()`
-  // function to consider a newline character as a valid 'end' token.
-
-  isEnd.newLineIsEnd = false; // YYY: move
-
-  // This flag is used in `consumeEnd()` to assess whether
-  // the found 'end' token was actually a newline character
-  // (in which case, reset `isEnd.newLineIsEnd`, any next newline
-  // character should not be counted as 'end' token until told
-  // otherwise)
-
-  isEnd.foundEndIsNewLine = false; // YYY: move
 
   // Scope
   // -----
@@ -2100,19 +2092,11 @@
   // If there is no previousToken as of yet, it is assumed to be BOF
   Marker.prototype.complete = function() {
     if (options.locations) {
-      if (!previousToken) {
-        this.loc.end.line = 1;
-        this.loc.end.column = 0;
-      } else {
-        this.loc.end.line = previousToken.lastLine || previousToken.line;
-        this.loc.end.column = previousToken.range[1] - (previousToken.lastLineStart || previousToken.lineStart);
-      }
+      this.loc.end.line = previousToken.lastLine || previousToken.line;
+      this.loc.end.column = previousToken.range[1] - (previousToken.lastLineStart || previousToken.lineStart);
     }
     if (options.ranges) {
-      if (!previousToken)
-        this.range[1] = 0;
-      else
-        this.range[1] = previousToken.range[1];
+      this.range[1] = previousToken.range[1];
     }
   };
 
@@ -2505,7 +2489,7 @@
     // No 'do' were found: the scope of the 'while' is implicitly opened
     if (mustBeSingleLineWhile) {
       // The very next EOL is syntactically equivalent to a 'end'
-      isEnd.newLineIsEnd = true;
+      newLineIsEnd = true;
       // If the first token of the block is the punctuator ';', it can be the only statement
       canBeEmptySingleLineWhile = canBeEmptySingleLineWhile && Punctuator === token.type && ';' === token.value;
     }
@@ -2612,7 +2596,7 @@
     // No 'then' were found: the scope of the 'if' is implicitly opened
     if (mustBeSingleLineIf) {
       // The very next EOL is syntactically equivalent to a 'end'
-      isEnd.newLineIsEnd = true;
+      newLineIsEnd = true;
       // If the first token of the block is the punctuator ';', it can be the only statement
       canBeEmptySingleLineIf = canBeEmptySingleLineIf && Punctuator === token.type && ';' === token.value;
     }
@@ -2662,7 +2646,7 @@
     if (mustBeSingleLineIf && 0 === clauses[0].body.length && 1 === clauses.length && !canBeEmptySingleLineIf) {
       var validEndToken = 'end' === token.value && index < length;
       // This last index check is because `consumeEOF` sends an artificial 'end' token in case
-      // of dangling `isEnd.newLineIsEnd`; though it does not count as a valid end here
+      // of dangling `newLineIsEnd`; though it does not count as a valid end here
       if (!validEndToken)
         raise(token, errors.expected, 'then', tokenValue(previousToken));
     }
@@ -3495,7 +3479,6 @@
     },
     'PICO-8-0.2.3': {
       _inherits: ['PICO-8-0.2.2'],
-      // XXX: feature names...
       singleLinePrintNoLineDependency: true, // actual behavior is to be tested more, but '?' shorthand can appear same line as an single line if/while
       allowEmptySingleLineIf: true, // 'if' single line syntax may be empty of statement using a ';'
       allowEmptySingleLineWhile: true, // 'while' single line syntax may be empty of statement using a ';'
@@ -3545,7 +3528,6 @@
     line = 1;
     lineStart = 0;
     length = input.length;
-    // _Actually_ rewind the lexer thanks
     previousToken = undefined;
     token = undefined;
     lookahead = undefined;
@@ -3553,9 +3535,8 @@
     comments = undefined;
     tokenStart = undefined;
     currentP8Section = undefined;
-    // Please just rewind the lexer properly
-    isEnd.newLineIsEnd = false; // YYY: also
-    isEnd.foundEndIsNewLine = false; // YYY: also
+    newLineIsEnd = false;
+    foundEndIsNewLine = false;
     newLineIsClose = false;
     // When tracking identifier scope, initialize with an empty scope.
     scopes = [[]];
