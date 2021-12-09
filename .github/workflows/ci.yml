@@ -140,21 +140,21 @@ jobs:
         with:
           ref: refs/heads/gh-pages
           path: .
-      - name: Check out luaparse
+      - name: Check out pico8parse
         uses: actions/checkout@v2
         with:
-          path: luaparse
+          path: pico8parse
       - name: Rebuild documentation
         run: |
           rm -rf coverage examples lib benchmarks
-          sed -i -e 's/\.\.\///g' luaparse/docs/layout/head.html luaparse/docs/*.md
-          make -C luaparse install docs
-          mv luaparse/docs/* .
-          mv luaparse/examples .
-          mv luaparse/luaparse.js .
-          mv luaparse/benchmarks .
-          cp -rf luaparse/test .
-          rm -rf *.md layout luaparse public
+          sed -i -e 's/\.\.\///g' pico8parse/docs/layout/head.html pico8parse/docs/*.md
+          make -C pico8parse install docs
+          mv pico8parse/docs/* .
+          mv pico8parse/examples .
+          mv pico8parse/pico8parse.js .
+          mv pico8parse/benchmarks .
+          cp -rf pico8parse/test .
+          rm -rf *.md layout pico8parse public
       - name: Upload updated documentation to GitHub Pages
         run: |
           git add .

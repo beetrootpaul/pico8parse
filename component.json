@@ -1,10 +1,10 @@
 {
-  "name": "luaparse",
-  "repository": "fstirlitz/luaparse",
-  "description": "A Lua parser in JavaScript",
-  "version": "0.2.1",
-  "keywords": ["ast", "lua", "parser", "parsing"],
-  "main": "luaparse.js",
-  "scripts": ["luaparse.js"],
+  "name": "pico8parse",
+  "repository": "PictElm/pico8parse",
+  "description": "A Lua parser in JavaScript, with support for the PICO-8 flavour",
+  "version": "0.4.0",
+  "keywords": ["ast", "lua", "parser", "parsing", "pico8"],
+  "main": "pico8parse.js",
+  "scripts": ["pico8parse.js"],
   "license": "MIT"
 }

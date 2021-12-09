@@ -4,7 +4,7 @@
 'use strict';
 
 var Benchmark = require('benchmark')
-  , luaparse = require('../')
+  , pico8parse = require('../')
   , fs = require('fs')
   , path = require('path')
   , files = process.argv.slice(2)
@@ -24,8 +24,8 @@ files.forEach(function(file) {
     minTime = file.replace(/^--minTime=/, '');
     return;
   }
-  if (/^--luaparse=/.test(file)) {
-    luaparse = require(file.replace(/^--luaparse=/, ''));
+  if (/^--pico8parse=/.test(file)) {
+    pico8parse = require(file.replace(/^--pico8parse=/, ''));
     return;
   }
 
@@ -50,7 +50,7 @@ Object.keys(suites).forEach(function(file) {
 
   Object.keys(settingsSets).forEach(function(set) {
     suite.add(file + ' ' + set, function() {
-      luaparse.parse(source, settingsSets[set]);
+      pico8parse.parse(source, settingsSets[set]);
     }, { minSamples: minSamples, minTime: minTime });
   });
 });

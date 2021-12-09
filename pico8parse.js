@@ -50,10 +50,10 @@
   else {
     factory((root[name] = {}));
   }
-}(this, 'luaparse', function (exports) {
+}(this, 'pico8parse', function (exports) {
   'use strict';
 
-  exports.version = "0.3.1";
+  exports.version = "0.4.0";
 
   var input, options, length, features, encodingMode;
 
@@ -84,7 +84,7 @@
     // The variable's name will be passed as the only parameter
     , onLocalDeclaration: null
     // The version of Lua targeted by the parser (string; allowed values are
-    // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2', 'PICO-8-0.2.3').
+    // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1'..'PICO-8-0.2.4').
     , luaVersion: '5.1'
     // Encoding mode: how to interpret code units higher than U+007F in input
     , encodingMode: 'none'
@@ -3313,7 +3313,7 @@
   //
   // Example:
   //
-  //     var parser = require('luaparse');
+  //     var parser = require('pico8parse');
   //     parser.parse('i = 0');
 
   exports.parse = parse;
@@ -3620,7 +3620,7 @@
 
     /* istanbul ignore if */
     if (locations.length > 0)
-      throw new Error('Location tracking failed. This is most likely a bug in luaparse');
+      throw new Error('Location tracking failed. This is most likely a bug in pico8parse.');
 
     return chunk;
   }

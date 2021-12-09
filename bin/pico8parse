@@ -5,7 +5,7 @@
 
 var fs = require('fs')
   , util = require('util')
-  , luaparse = require('../luaparse')
+  , pico8parse = require('../pico8parse')
   , args = process.argv.splice(2)
   , stdin = process.stdin
   , isTTY = stdin.isTTY
@@ -18,7 +18,7 @@ var fs = require('fs')
 
 function usage() {
   console.log([
-      "Usage: luaparse [option]... [file|code]..."
+      "Usage: pico8parse [option]... [file|code]..."
     , "\nOptions:"
     , "  -c|--code [code]   parse code snippet"
     , "  -f|--file [file]   parse from file"
@@ -32,8 +32,8 @@ function usage() {
     , "  -v|--version"
     , "  --verbose"
     , "\nExamples:"
-    , "  luaparse --no-comments -c \"locale foo = \\\"bar\\\"\""
-    , "  luaparse foo.lua bar.lua"
+    , "  pico8parse --no-comments -c \"locale foo = \\\"bar\\\"\""
+    , "  pico8parse foo.lua bar.lua"
   ].join("\n"));
 }
 
@@ -74,7 +74,11 @@ for (var i = 0, l = args.length; i < l; i++) {
         options.extendedIdentifiers = bool;
         continue;
       case 'v': case 'version':
-        console.log("luaparse v%s", luaparse.version);
+        console.log("pico8parse v%s", pico8parse.version);
+        console.log("Supported versions:");
+        var map = pico8parse.versionFeatures;
+        for (var ver in map) if (map.hasOwnProperty(ver))
+          console.log("  '%s'", ver);
         process.exit(0);
         break;
       case 'h': case 'help':
@@ -99,11 +103,11 @@ function done() {
   snippets.forEach(function(snippet) {
     var message, ast;
     try {
-      ast = luaparse.parse(snippet.code, options);
+      ast = pico8parse.parse(snippet.code, options);
       message = beautify ? JSON.stringify(ast, null, '  ')
         : JSON.stringify(ast);
     } catch(e) {
-      if (!(e instanceof luaparse.SyntaxError))
+      if (!(e instanceof pico8parse.SyntaxError))
         throw e;
       message = util.format("%s: %s", snippet.name, e.message);
       if (verbose) console.log(e.stack);

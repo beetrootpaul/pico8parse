@@ -57,7 +57,7 @@ $_targets = @{
     }
     'version-bump' = {
         & $BIN\gulp.ps1 version-bump
-        git add luaparse.js
+        git add pico8parse.js
     }
 
     # Tests
@@ -121,7 +121,7 @@ $_targets = @{
     'complexity-analysis' = {
         Write-Host "===================== Complexity analysis ============================"
         node .\scripts\complexity 10
-        & $BIN\cr.ps1 -lws --maxcc 22 luaparse.js
+        & $BIN\cr.ps1 -lws --maxcc 22 pico8parse.js
     }
     'coverage-analysis' = [DependsOn]::new(@('coverage')).Then({
         & $BIN\nyc.ps1 check-coverage --statements 100 --branches 100 --functions 100

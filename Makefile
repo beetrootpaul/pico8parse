@@ -29,7 +29,7 @@ update:
 
 version-bump:
 	$(BIN)/gulp version-bump
-	git add luaparse.js
+	git add pico8parse.js
 
 .PHONY: install update version-bump
 
@@ -114,7 +114,7 @@ benchmark-previous:
 complexity-analysis:
 	@echo "===================== Complexity analysis ============================"
 	./scripts/complexity 10
-	$(BIN)/cr -lws --maxcc 22 luaparse.js
+	$(BIN)/cr -lws --maxcc 22 pico8parse.js
 
 coverage-analysis: coverage
 	$(BIN)/nyc check-coverage --statements 100 --branches 100 --functions 100
