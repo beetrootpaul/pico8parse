@@ -1181,7 +1181,19 @@
     },
     {
       "source": "while (1)",
-      "result": "[1:9] '<body>' expected near '<eof>'",
+      "result": "[1:9] 'do' expected near ')'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "while (1);",
+      "result": "[1:10] 'do' expected near ';'",
       "options": {
         "comments": true,
         "locations": true,
@@ -1871,13 +1883,222 @@
     },
     {
       "source": "while (1) end",
-      "result": "[1:10] '<body>' expected near 'end'",
+      "result": "[1:10] 'do' expected near ')'",
       "options": {
         "comments": true,
         "locations": true,
         "ranges": true,
         "scope": true,
         "luaVersion": "PICO-8-0.2.1",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "while (1)",
+      "result": "[1:9] 'do' expected near ')'",
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "while (1);\n",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "WhileStatement",
+            "condition": {
+              "type": "NumericLiteral",
+              "value": 1,
+              "raw": "1",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 7
+                },
+                "end": {
+                  "line": 1,
+                  "column": 8
+                }
+              },
+              "range": [
+                7,
+                8
+              ]
+            },
+            "body": [],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 0
+              }
+            },
+            "range": [
+              0,
+              11
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 0
+          }
+        },
+        "range": [
+          0,
+          11
+        ],
+        "comments": [],
+        "globals": []
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
+        "ignoreStrictP8FileFormat": true
+      }
+    },
+    {
+      "source": "while (1);\nlocal a = 1",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "WhileStatement",
+            "condition": {
+              "type": "NumericLiteral",
+              "value": 1,
+              "raw": "1",
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 7
+                },
+                "end": {
+                  "line": 1,
+                  "column": 8
+                }
+              },
+              "range": [
+                7,
+                8
+              ]
+            },
+            "body": [],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 10
+              }
+            },
+            "range": [
+              0,
+              10
+            ]
+          },
+          {
+            "type": "LocalStatement",
+            "variables": [
+              {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 2,
+                    "column": 6
+                  },
+                  "end": {
+                    "line": 2,
+                    "column": 7
+                  }
+                },
+                "range": [
+                  17,
+                  18
+                ],
+                "isLocal": true
+              }
+            ],
+            "init": [
+              {
+                "type": "NumericLiteral",
+                "value": 1,
+                "raw": "1",
+                "loc": {
+                  "start": {
+                    "line": 2,
+                    "column": 10
+                  },
+                  "end": {
+                    "line": 2,
+                    "column": 11
+                  }
+                },
+                "range": [
+                  21,
+                  22
+                ]
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 11
+              }
+            },
+            "range": [
+              11,
+              22
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 11
+          }
+        },
+        "range": [
+          0,
+          22
+        ],
+        "comments": [],
+        "globals": []
+      },
+      "options": {
+        "comments": true,
+        "locations": true,
+        "ranges": true,
+        "scope": true,
+        "luaVersion": "PICO-8-0.2.3",
         "ignoreStrictP8FileFormat": true
       }
     }
