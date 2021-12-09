@@ -86,3 +86,11 @@ a = ""--[[..]] if (a) print(a)
 if (1)@n@                               -- FAIL
 if (1);@n@
 if (1);@n@local a = 1
+
+// { "luaVersion": "PICO-8-0.2.4", "ignoreStrictP8FileFormat": true }
+// allowAnyBeforeSingleLineIf
+a = "42"if (a) print(a)
+a = 0xFF;if (a) print(a)
+a = ""--[[..]]if (a) print(a)
+a = "" --[[..]]if (a) print(a)
+a = "" --[[..]]--[[..]]if (a) print(a)

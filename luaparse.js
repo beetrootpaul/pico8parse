@@ -2463,13 +2463,13 @@
     //  - previous token is numeral
     //  - no character before statement
     //  - character before statement is whitespace or lineterminator
-    if (canBeSingleLineWhile /*&& true !== newLineIsEnd*/) {
-      var startIndex = token.range[0];
-      canBeSingleLineWhile = previousToken && NumericLiteral === previousToken.type || 0 === startIndex;
+    //  - >= PICO-8-0.2.4
+    if (canBeSingleLineWhile) {
+      canBeSingleLineWhile = features.allowAnyBeforeSingleLineWhile || !previousToken || NumericLiteral === previousToken.type;
       // If the previous token is not a numeral (or beginning of stream), scan backward
       // 1 character expecting a blank character (whitespace or lineterminator)
       if (!canBeSingleLineWhile) {
-        var previousCharCode = input.charCodeAt(startIndex-1);
+        var previousCharCode = input.charCodeAt(token.range[0]-1);
         canBeSingleLineWhile = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
       }
     }
@@ -2558,13 +2558,13 @@
     //  - previous token is numeral
     //  - no character before statement
     //  - character before statement is whitespace or lineterminator
-    if (canBeSingleLineIf /*&& true !== newLineIsEnd*/) {
-      var startIndex = token.range[0];
-      canBeSingleLineIf = !previousToken || NumericLiteral === previousToken.type || 0 === startIndex;
+    //  - >= PICO-8-0.2.4
+    if (canBeSingleLineIf) {
+      canBeSingleLineIf = features.allowAnyBeforeSingleLineIf || !previousToken || NumericLiteral === previousToken.type;
       // If the previous token is not a numeral (or beginning of stream), scan 1 character
       // past the previous token expecting a blank character (whitespace or lineterminator)
       if (!canBeSingleLineIf) {
-        var previousCharCode = input.charCodeAt(startIndex-1);
+        var previousCharCode = input.charCodeAt(token.range[0]-1);
         canBeSingleLineIf = isWhiteSpace(previousCharCode) || isLineTerminator(previousCharCode);
       }
     }
@@ -3482,6 +3482,11 @@
       singleLinePrintNoLineDependency: true, // actual behavior is to be tested more, but '?' shorthand can appear same line as an single line if/while
       allowEmptySingleLineIf: true, // 'if' single line syntax may be empty of statement using a ';'
       allowEmptySingleLineWhile: true, // 'while' single line syntax may be empty of statement using a ';'
+    },
+    'PICO-8-0.2.4': {
+      _inherits: ['PICO-8-0.2.3'],
+      allowAnyBeforeSingleLineIf: true, // 'if' single line no longer needs to be preceded by a blank or number
+      allowAnyBeforeSingleLineWhile: true, // 'while' single line no longer needs to be preceded by a blank or number
     },
   };
 
