@@ -882,6 +882,7 @@
     },
     {
       "source": "a() ?a",
+      "result": "[1:5] unexpected symbol '?' near ')'",
       "options": {
         "comments": true,
         "locations": true,
@@ -1699,6 +1700,7 @@
     },
     {
       "source": "a = 1 ?a",
+      "result": "[1:7] unexpected symbol '?' near '1'",
       "options": {
         "comments": true,
         "locations": true,
@@ -1710,6 +1712,7 @@
     },
     {
       "source": "a = 2; ?a",
+      "result": "[1:8] unexpected symbol '?' near ';'",
       "options": {
         "comments": true,
         "locations": true,
@@ -1721,7 +1724,7 @@
     },
     {
       "source": "(?a)",
-      "result": "[1:4] unexpected symbol near '<eof>'",
+      "result": "[1:2] unexpected symbol '?' near '('",
       "options": {
         "comments": true,
         "locations": true,
@@ -1733,7 +1736,7 @@
     },
     {
       "source": "(?a\n)",
-      "result": "[2:1] unexpected symbol near '<eof>'",
+      "result": "[1:2] unexpected symbol '?' near '('",
       "options": {
         "comments": true,
         "locations": true,
