@@ -1787,10 +1787,11 @@
       lookahead = fakeToken;
       fakeToken = undefined;
     } else {
-      var pline = line;
+      var pline = line
+        , newLineWasClose = newLineIsClose;
       lookahead = lex();
 
-      if (newLineIsClose && (pline !== line || EOF === lookahead.type)) {
+      if (newLineWasClose && (pline !== line || EOF === lookahead.type)) {
         newLineIsClose = false;
         fakeToken = lookahead;
         lookahead = {

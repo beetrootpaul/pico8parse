@@ -683,7 +683,194 @@
     },
     {
       "source": "a()\n?a\n",
-      "result": "",
+      "result": {
+        "type": "Chunk",
+        "body": [
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "a",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 1
+                  }
+                },
+                "range": [
+                  0,
+                  1
+                ],
+                "isLocal": false
+              },
+              "arguments": [],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 0
+                },
+                "end": {
+                  "line": 1,
+                  "column": 3
+                }
+              },
+              "range": [
+                0,
+                3
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 3
+              }
+            },
+            "range": [
+              0,
+              3
+            ]
+          },
+          {
+            "type": "CallStatement",
+            "expression": {
+              "type": "CallExpression",
+              "base": {
+                "type": "Identifier",
+                "name": "print",
+                "loc": {
+                  "start": {
+                    "line": 2,
+                    "column": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "column": 0
+                  }
+                },
+                "range": [
+                  4,
+                  4
+                ],
+                "isLocal": false
+              },
+              "arguments": [
+                {
+                  "type": "Identifier",
+                  "name": "a",
+                  "loc": {
+                    "start": {
+                      "line": 2,
+                      "column": 1
+                    },
+                    "end": {
+                      "line": 2,
+                      "column": 2
+                    }
+                  },
+                  "range": [
+                    5,
+                    6
+                  ],
+                  "isLocal": false
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 2,
+                  "column": 0
+                },
+                "end": {
+                  "line": 2,
+                  "column": 1
+                }
+              },
+              "range": [
+                4,
+                5
+              ]
+            },
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 1
+              }
+            },
+            "range": [
+              4,
+              5
+            ]
+          }
+        ],
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0
+          },
+          "end": {
+            "line": 2,
+            "column": 1
+          }
+        },
+        "range": [
+          0,
+          5
+        ],
+        "comments": [],
+        "globals": [
+          {
+            "type": "Identifier",
+            "name": "a",
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 0
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            },
+            "range": [
+              0,
+              1
+            ],
+            "isLocal": false
+          },
+          {
+            "type": "Identifier",
+            "name": "print",
+            "loc": {
+              "start": {
+                "line": 2,
+                "column": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 0
+              }
+            },
+            "range": [
+              4,
+              4
+            ],
+            "isLocal": false
+          }
+        ]
+      },
       "options": {
         "comments": true,
         "locations": true,
