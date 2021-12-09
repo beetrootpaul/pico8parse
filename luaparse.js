@@ -725,11 +725,15 @@
     , token
     , previousToken
     , lookahead
+    , fakeToken
     , comments
     , tokenStart
     , line
     , lineStart
-    , currentP8Section;
+    , currentP8Section
+    //, newLineIsEnd // YYY: here
+    //, foundEndIsNewLine // YYY: here
+    , newLineIsClose;
 
   exports.lex = lex;
 
@@ -755,7 +759,7 @@
       charCode = input.charCodeAt(index);
       next = input.charCodeAt(index + 1);
     }
-    if (index >= length) return consumeEOF();
+    if (index >= length && !fakeToken) return consumeEOF();
 
     // Memorize the range index where the token begins.
     tokenStart = index;
@@ -772,7 +776,7 @@
     if (isStringQuote(charCode)) return scanStringLiteral();
     if (isDecDigit(charCode) || 46 === charCode && isDecDigit(next)) return scanNumericLiteral();
 
-    // Will try to scan for VarargLiteral and Punctuator;
+    // Will try to scan for VarargLiteral, Punctuator and the '?' "operator";
     // if it does not appear to match any, returns null.
     var other = scanOther(charCode, next);
     if (null !== other) return other;
@@ -1039,7 +1043,28 @@
       case 63: // ?
         if (!features.singleLinePrint)
           break;
-        return scanPunctuator('?');
+        // The '?' "operator" must be preceded by no token on the same
+        // line, otherwise it is not recognized.
+        if (token && token.line === line)
+          break;
+        // The '?' token essentially correspond to 2 token directly
+        // and 1 more later: the identifier 'print', a '(' punctuator
+        // and eventually a ')' punctuator on line end.
+        fakeToken = {
+            type: Punctuator
+          , value: '('
+          , line: line
+          , lineStart: lineStart
+          , range: [tokenStart, index]
+        };
+        newLineIsClose = true;
+        return {
+            type: Identifier
+          , value: 'print'
+          , line: line
+          , lineStart: lineStart
+          , range: [tokenStart, index++]
+        };
 
       case 44: case 123: case 125: case 93:
       case 40: case 41: case 59: case 35: // , { } ] ( ) ; #
@@ -1761,7 +1786,27 @@
   function next() {
     previousToken = token;
     token = lookahead;
-    lookahead = lex();
+
+    if (fakeToken) {
+      lookahead = fakeToken;
+      fakeToken = undefined;
+    } else {
+      var pline = line
+        , newLineWasClose = newLineIsClose;
+      lookahead = lex();
+
+      if (newLineWasClose && (pline !== line || EOF === lookahead.type)) {
+        newLineIsClose = false;
+        fakeToken = lookahead;
+        lookahead = {
+            type: Punctuator
+          , value: ')'
+          , line: token.line
+          , lineStart: token.lineStart
+          , range: [tokenStart, tokenStart]
+        };
+      }
+    }
   }
 
   // Consume a token if its value matches. Once consumed or not, return the
@@ -1957,7 +2002,7 @@
   // is encountered and trigger the `isEnd()` and `consumeEnd()`
   // function to consider a newline character as a valid 'end' token.
 
-  isEnd.newLineIsEnd = false;
+  isEnd.newLineIsEnd = false; // YYY: move
 
   // This flag is used in `consumeEnd()` to assess whether
   // the found 'end' token was actually a newline character
@@ -1965,7 +2010,7 @@
   // character should not be counted as 'end' token until told
   // otherwise)
 
-  isEnd.foundEndIsNewLine = false;
+  isEnd.foundEndIsNewLine = false; // YYY: move
 
   // Scope
   // -----
@@ -2790,34 +2835,6 @@
         base = parseExpectedExpression(flowContext);
         expect(')');
         lvalue = false;
-      } else if (features.singleLinePrint && '?' === token.value) {
-        var theSingleLine = token.line
-          , previousTokenLine = previousToken ? previousToken.line : -1;
-
-        pushLocation(marker);
-        base = finishNode(ast.identifier('?'));
-
-        next();
-        pushLocation(marker);
-
-        // Must be not on the same line as previous (if any)
-        if (theSingleLine === previousTokenLine) unexpected(token);
-
-        // Next should be a valid explist (or nothing) all on the same line
-        var expressions = [];
-        var expression = parseExpression(flowContext);
-        if (previousToken.line !== theSingleLine) unexpected('?');
-        if (null != expression) expressions.push(expression);
-        while (consume(',')) {
-          expression = parseExpectedExpression(flowContext);
-          if (previousToken.line !== theSingleLine) unexpected('?');
-          expressions.push(expression);
-        }
-
-        // After what, must not be on the same line as next
-        if (theSingleLine === token.line && EOF !== token.type) unexpected('?');
-
-        return finishNode(ast.callExpression(base, expressions));
       } else {
         return unexpected(token);
       }
@@ -3532,12 +3549,14 @@
     previousToken = undefined;
     token = undefined;
     lookahead = undefined;
+    fakeToken = undefined;
     comments = undefined;
     tokenStart = undefined;
     currentP8Section = undefined;
     // Please just rewind the lexer properly
-    isEnd.newLineIsEnd = false;
-    isEnd.foundEndIsNewLine = false;
+    isEnd.newLineIsEnd = false; // YYY: also
+    isEnd.foundEndIsNewLine = false; // YYY: also
+    newLineIsClose = false;
     // When tracking identifier scope, initialize with an empty scope.
     scopes = [[]];
     scopeDepth = 0;
