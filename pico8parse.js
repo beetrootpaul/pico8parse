@@ -86,11 +86,10 @@
     // The version of Lua targeted by the parser (string; allowed values are
     // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1'..'PICO-8-0.2.4').
     , luaVersion: '5.1'
-    // Encoding mode: how to interpret code units higher than U+007F in input
+    // Encoding mode: how to interpret code units higher than U+007F in input.
     , encodingMode: 'none'
-    // This option should be reserved for testing but may be use if needed;
-    // it overrides the `strictP8FileFormat` feature, making it possible to parse
-    // snippets lacking the proper header and sections
+    // This option overrides the `strictP8FileFormat` feature, making it possible to parse
+    // snippets lacking the proper header and sections.
     , ignoreStrictP8FileFormat: false
   };
 

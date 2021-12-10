@@ -62,7 +62,7 @@ scaffold-test:
 # Documentation
 # -------------
 
-docs: coverage docs-test docs-md
+docs: coverage docs-md
 
 docs-index:
 	$(BIN)/marked README.md --gfm \
@@ -83,7 +83,7 @@ docs-md: docs-index $(patsubst %.md,%.html, $(wildcard docs/*.md))
 		| cat docs/layout/head.html - docs/layout/foot.html \
 		> $@
 
-.PHONY: docs docs-test docs-index
+.PHONY: docs docs-index
 
 # Coverage
 # --------

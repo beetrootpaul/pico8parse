@@ -78,7 +78,7 @@ $_targets = @{
 
     # Documentation
     # -------------
-    'docs' = [DependsOn]::new(@('coverage', 'docs-test', 'docs-md'))
+    'docs' = [DependsOn]::new(@('coverage', 'docs-md'))
     'docs-index' = {
         Get-Content .\docs\layout\head.html  > .\docs\index.html
         & .\$BIN\marked.ps1 README.md --gfm >> .\docs\index.html
@@ -113,8 +113,8 @@ $_targets = @{
     # Benchmark
     # ---------
     'benchmark' = { node .\scripts\benchmark -v .\benchmarks\lib\ParseLua.lua }
-    'profile' = { Write-Host 'no bash, no run.sh' }
-    'benchmark-previous' = { Write-Host 'no bash, no run.sh' }
+    'profile' = { & .\benchmarks\run.sh -Verb -Processor $PROCESSOR -Prof HEAD }
+    'benchmark-previous' = { & .\benchmarks\run.sh -Js HEAD HEAD~1 }
 
     # Quality Assurance
     # -----------------
