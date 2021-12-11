@@ -7,8 +7,20 @@ The values added for the parser `luaVersion` option are:
  - `'PICO-8'` (should not be used, just for feature inheritance)
  - `'PICO-8-0.2.1'`
  - `'PICO-8-0.2.2'` (adds support for some escape sequences)
+ - `'PICO-8-0.2.3'` (empty `if`/`while`, `?` on same line)
+ - `'PICO-8-0.2.4'` (any character before `if`/`while`)
 
-> Disclaimer: the first implemented version is from PICO-8 0.2.1. Furthermore, this was mainly developed and tested with 0.2.1 as of yet.
+If the targeted version is not in this list, the closest preceding version should have the same syntaxes.
+
+> TL;DR: PICO-8 Lua differs from standard Lua because it is preprocessed; for example the `'?'` "operator" is simply replaced with `' print('`. The way this is done introduces many cursed syntaxes (and I don't want to maintain a list of these). To see the result of this preprocessing you can use [this same trick](https://gist.github.com/PictElm/b85467b379d676481e6a4483ee2ef5a0) (until fixed) with a cartridge containing exactly:
+> ```
+> pico-8 cartridge
+> 
+> __lua__
+> printh[=[
+> #include file_with_code_to_inspect
+> ]=]
+> ```
 
 ## Miscellaneous
 
@@ -29,6 +41,7 @@ Differences with the official interpreter for PICO-8 version 0.2.1:
 
 PICO-8 Lua reads `//` as a single line comment (similarly to C-inspired languages). Do note that this is not a simple alias for `--` as it will not start a longstring comment:
 
+<!-- 'js' just for colors -->
 ```js
 // comment
 
@@ -275,6 +288,8 @@ instr()--[[]] if (cdt) instr()
 a = 0xf--[[]]if (cdt) instr()
 ```
 
+This dependency on the preceding character/token was removed in version 0.2.4 (making every lines above valid, even without comments).
+
 Finally, it is important to notice that the body of the clause cannot be empty. Or maybe just sometimes. To be more specific, a single line `if` or `while` with no instruction following (before end-of-line) is not considered valid, but a single line `if` containing an `else` clause (albeit empty) is valid.
 
 ```lua
@@ -282,13 +297,23 @@ Finally, it is important to notice that the body of the clause cannot be empty. 
 while (cdt)
 if (cdt)
 
---valid
+-- valid
 while (cdt) instr()
 if (cdt) instr()
 if (cdt) else instr()
 
 -- also valid
 if (cdt) else
+```
+
+This was changed in version 0.2.3, above which the following is made possible:
+
+```lua
+-- valid
+while (cdt) ;
+
+-- still invalid
+while (cdt)
 ```
 
 ## Print Shorthand
@@ -318,7 +343,25 @@ instr()    --[[]]    ?"text"
 ?("text"), (1)
 ```
 
-## P8SCII (experimental)
+Although from version 0.2.3 onward, this was changed to allow the `?` "operator" to appear on the same line as a single line `if`/`while`, making the following valid:
+
+```lua
+-- valid
+if (cdt) ?"text"
+instr() ?"text"
+
+-- also valid
+??"text") -- what?
+```
+
+The actual behavior of the preprocessor regarding the `?` is rather simple and explains that last line:
+
+ - a valid `?` is replaced with exactly ` print(`
+ - this marks the end of the line for _a single parenthesis_
+
+Therefor `?"text"` translates to ` print("text")` and `??"text"` would only translate to ` print( print("text")` (only one closing parenthesis).
+
+## P8SCII
 
 > Remark: this feature is only available when specifying a version above `'PICO-8-0.2.2'` and might be erroneous in some places.
 
@@ -345,7 +388,7 @@ Scripts in the PICO-8 Lua flavour are usually part of .p8 files. The convoluted 
 
 > Uh.. note: as per the current implementation of `ignoreStrictP8FileFormat`, only the header check is ignored and the stream is assumed to start in a `'__lua__'` section; but further section-starting sequences **are still accounted for**.
 
-## Overall format
+## Overall Format
 
 A typical .p8 file starts with the following 2-lines header:
 

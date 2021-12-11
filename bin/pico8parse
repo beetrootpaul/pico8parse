@@ -5,7 +5,7 @@
 
 var fs = require('fs')
   , util = require('util')
-  , luaparse = require('../luaparse')
+  , pico8parse = require('../pico8parse')
   , args = process.argv.splice(2)
   , stdin = process.stdin
   , isTTY = stdin.isTTY
@@ -18,7 +18,7 @@ var fs = require('fs')
 
 function usage() {
   console.log([
-      "Usage: luaparse [option]... [file|code]..."
+      "Usage: pico8parse [option]... [file|code]..."
     , "\nOptions:"
     , "  -c|--code [code]   parse code snippet"
     , "  -f|--file [file]   parse from file"
@@ -27,13 +27,15 @@ function usage() {
     , "  --[no]-scope       store variable scope. defaults to false"
     , "  --[no]-locations   store location data on syntax nodes. defaults to false"
     , "  --[no]-ranges      store start and end character locations. defaults to false"
+    , "  --[no]-p8format    ignore the p8 file format. default to true when applicable"
+    , "  -L|--luaversion    Lua version to use. use with no value to print the list"
     , "  -q|--quiet         suppress output"
     , "  -h|--help"
     , "  -v|--version"
     , "  --verbose"
     , "\nExamples:"
-    , "  luaparse --no-comments -c \"locale foo = \\\"bar\\\"\""
-    , "  luaparse foo.lua bar.lua"
+    , "  pico8parse --no-comments -c \"locale foo = \\\"bar\\\"\""
+    , "  pico8parse foo.lua bar.lua"
   ].join("\n"));
 }
 
@@ -67,14 +69,30 @@ for (var i = 0, l = args.length; i < l; i++) {
       case 'comments': case 'scope': case 'locations': case 'ranges':
         options[flag] = bool;
         continue;
+      case 'p8format':
+        options.ignoreStrictP8FileFormat = !bool;
+        continue;
       case 'L': case 'luaversion':
         options.luaVersion = args[++i];
+        var map = pico8parse.versionFeatures
+          , dfl = pico8parse.defaultOptions.luaVersion
+          , lst = []
+          , ver, k;
+        if (!map.hasOwnProperty(options.luaVersion)) {
+          console.log("Supported values for luaversion:");
+          for (ver in map) if (map.hasOwnProperty(ver))
+            lst.push(ver);
+          lst.sort();
+          for (k = 0, ver = lst[0]; k < lst.length; ver = lst[++k])
+            console.log("  '%s'%s", ver, dfl === ver ? "*" : "");
+          process.exit(0);
+        }
         continue;
       case 'X': case 'extendedidentifiers':
         options.extendedIdentifiers = bool;
         continue;
       case 'v': case 'version':
-        console.log("luaparse v%s", luaparse.version);
+        console.log("pico8parse v%s", pico8parse.version);
         process.exit(0);
         break;
       case 'h': case 'help':
@@ -99,11 +117,11 @@ function done() {
   snippets.forEach(function(snippet) {
     var message, ast;
     try {
-      ast = luaparse.parse(snippet.code, options);
+      ast = pico8parse.parse(snippet.code, options);
       message = beautify ? JSON.stringify(ast, null, '  ')
         : JSON.stringify(ast);
     } catch(e) {
-      if (!(e instanceof luaparse.SyntaxError))
+      if (!(e instanceof pico8parse.SyntaxError))
         throw e;
       message = util.format("%s: %s", snippet.name, e.message);
       if (verbose) console.log(e.stack);

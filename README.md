@@ -4,8 +4,6 @@ See [the original README](README-luaparse.md) or the linked GitHub above for mor
 
 The intention is to add support for the PICO-8 flavour of Lua which brings a few new syntaxes, tokens and a whole file format (all described [here](README-pico8parse.md)).
 
-Versioning: revisions specific to this fork will be appended to the patch number, at the end of the SemVer string, preceded by two zeros (eg. `0.3.1001`). Fork-specific revision number are reset on minor or major version update (eg. from merging upstream).
-
 ## A Fork of the luaparse
 
 A few changes were made regarding the versions of Lua that were already supported by the original luaparse:

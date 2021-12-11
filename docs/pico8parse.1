@@ -1,10 +1,10 @@
-.TH luaparse "1" "June 7, 2013" "" "luaparse manual"
+.TH pico8parse "1" "June 7, 2013" "" "pico8parse manual"
 .SH NAME
 
-luaparse - Lua parser
+pico8parse - Lua parser
 .SH SYNOPSIS
 
-.B luaparse
+.B pico8parse
 [-v|--version] [-h|--help] [-b|--beautify] [-q|--quiet] [--verbose]
 .RS
 [--[no]-comments] [--[no]-scope] [--[no]-locations] [--[no]-ranges]
@@ -26,14 +26,14 @@ luaparse - Lua parser
 .SH DESCRIPTION
 
 .B
-luaparse
+pico8parse
 is a parser producing JSON formatted Abstract Syntax Tree representations
 .br
 of Lua programs.
 .SH OPTIONS
 .B
 .IP "-v, --version"
-print luaparse's version
+print pico8parse's version
 .IP "-h, --help"
 prints usage instructions
 .B
@@ -58,6 +58,12 @@ store location information on each syntax nodes. defaults to false
 .IP "--[no]-ranges"
 store the start and end character locations on each syntax node. defaults to false
 .B
+.IP "--[no]-p8format"
+ignore the p8 file format. default to true when applicable
+.B
+.IP "-L, --luaversion"
+Lua version to use. use with no value to print the list
+.B
 .IP "-q, --quiet"
 suppress output
 .B
@@ -66,21 +72,22 @@ output additional information
 .SH EXAMPLES
 
 .B
-.IP "luaparse 'i = 2^2^3^4' 'i = 2^(2^(3^4))'"
+.IP "pico8parse 'i = 2^2^3^4' 'i = 2^(2^(3^4))'"
 Output the AST of both code snippets separated by a newline.
 .B
-.IP "luaparse foo.lua"
+.IP "pico8parse foo.lua"
 Output the AST of the Lua code in the file.
 .B
-.IP "luaparse --scope -b -c 'locale foo = 1'"
+.IP "pico8parse --scope -b -c 'locale foo = 1'"
 Output the indented AST of the code snippet and track variable scopes.
 .SH BUGS
 
-luaparse's bug tracker is located at <https://github.com/fstirlitz/luaparse/issues>
+pico8parse's bug tracker is located at <https://github.com/PictElm/pico8parse/issues>
 .SH DOCUMENTATION
 
-See the website for documentation <https://fstirlitz.github.io/luaparse/>
+See the website for documentation <https://pictelm.github.io/pico8parse/>
 .SH AUTHOR
 
-Originally written by Oskar Schöldström <http://www.oxy.fi/>.
-Currently maintained by felix <felix.von.s@posteo.de>
+Luaparse originally written by Oskar Schöldström <http://www.oxy.fi/>.
+Luaparse currently maintained by felix <felix.von.s@posteo.de>.
+pico8parse (fork of luaparse) maintained by Grenier Célestin.

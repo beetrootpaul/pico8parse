@@ -79,7 +79,7 @@ var striphtml = (function () {
 })();
 
 gulp.task('build', function() {
-  return gulp.src('luaparse.js')
+  return gulp.src('pico8parse.js')
     .pipe(header(banner, { pkg : pkg  } ))
     .pipe(gulp.dest('dist'))
     .pipe(uglify({ output: { comments: /^!|@preserve|@license|@cc_on/i } }))
@@ -109,7 +109,7 @@ gulp.task('lint', function() {
 gulp.task('version-bump', function () {
   var through = require('through2');
 
-  return gulp.src('luaparse.js')
+  return gulp.src('pico8parse.js')
     .pipe(through.obj(function processContent(file, enc, cb) {
       var data = file.contents.toString();
       file.contents = new Buffer(data.replace(

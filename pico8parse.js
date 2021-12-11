@@ -50,10 +50,10 @@
   else {
     factory((root[name] = {}));
   }
-}(this, 'luaparse', function (exports) {
+}(this, 'pico8parse', function (exports) {
   'use strict';
 
-  exports.version = "0.3.1";
+  exports.version = "0.4.0";
 
   var input, options, length, features, encodingMode;
 
@@ -84,13 +84,12 @@
     // The variable's name will be passed as the only parameter
     , onLocalDeclaration: null
     // The version of Lua targeted by the parser (string; allowed values are
-    // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1', 'PICO-8-0.2.2', 'PICO-8-0.2.3').
+    // '5.1', '5.2', '5.3', 'LuaJIT', 'PICO-8', 'PICO-8-0.2.1'..'PICO-8-0.2.4').
     , luaVersion: '5.1'
-    // Encoding mode: how to interpret code units higher than U+007F in input
+    // Encoding mode: how to interpret code units higher than U+007F in input.
     , encodingMode: 'none'
-    // This option should be reserved for testing but may be use if needed;
-    // it overrides the `strictP8FileFormat` feature, making it possible to parse
-    // snippets lacking the proper header and sections
+    // This option overrides the `strictP8FileFormat` feature, making it possible to parse
+    // snippets lacking the proper header and sections.
     , ignoreStrictP8FileFormat: false
   };
 
@@ -222,6 +221,7 @@
     , gotoJumpInLocalScope: '<goto %1> jumps into the scope of local \'%2\''
     , cannotUseVararg: 'cannot use \'...\' outside a vararg function near \'%1\''
     , invalidCodeUnit: 'code unit U+%1 is not allowed in the current encoding mode'
+    , missingHeader: 'missing header \'%1\''
   };
 
   // ### Abstract Syntax Tree
@@ -1934,15 +1934,15 @@
       if (indexOf(['+=', '-=', '*=', '/=', '%=', '^=', '..='], token.value) >= 0) return true;
       // Least common
       return indexOf([
-        features.backslashIntegerDivision && '\\=',
-        features.bitwiseOperators && '|=',
-        features.bitwiseOperators && '&=',
-        features.bitwiseOperators && '<<=',
-        features.bitwiseOperators && '>>=',
-        features.bitshiftAdditionalOperators && '>>>=',
-        features.bitshiftAdditionalOperators && '<<>=',
-        features.bitshiftAdditionalOperators && '>><=',
-        features.smileyBitwiseXor && '^^='
+          features.backslashIntegerDivision && '\\='
+        , features.bitwiseOperators && '|='
+        , features.bitwiseOperators && '&='
+        , features.bitwiseOperators && '<<='
+        , features.bitwiseOperators && '>>='
+        , features.bitshiftAdditionalOperators && '>>>='
+        , features.bitshiftAdditionalOperators && '<<>='
+        , features.bitshiftAdditionalOperators && '>><='
+        , features.smileyBitwiseXor && '^^='
       ], token.value) >= 0;
     }
     return false;
@@ -3313,51 +3313,46 @@
   //
   // Example:
   //
-  //     var parser = require('luaparse');
+  //     var parser = require('pico8parse');
   //     parser.parse('i = 0');
 
   exports.parse = parse;
 
   var versionFeatures = {
-    '5.1': {
-      // Lua supports trailing "." in hex numarals from 5.2 onward; this "feature" keep
+      '5.1': {
+      // Lua supports trailing "." in hex numerals from 5.2 onward; this "feature" keep
       // from parsing that as correct for Lua 5.1
-      noTrailingDotInHexNumeral: true
-    },
-    '5.2': {
-      labels: true,
-      emptyStatement: true,
-      hexEscapes: true,
-      skipWhitespaceEscape: true,
-      strictEscapes: true,
-      relaxedBreak: true
-    },
-    '5.3': {
-      labels: true,
-      emptyStatement: true,
-      hexEscapes: true,
-      skipWhitespaceEscape: true,
-      strictEscapes: true,
-      unicodeEscapes: true,
-      bitwiseOperators: true,
-      integerDivision: true,
-      relaxedBreak: true
-    },
-    'LuaJIT': {
+        noTrailingDotInHexNumeral: true
+    }
+    , '5.2': {
+        labels: true
+      , emptyStatement: true
+      , hexEscapes: true
+      , skipWhitespaceEscape: true
+      , strictEscapes: true
+      , relaxedBreak: true
+    }
+    , '5.3': {
+        _inherits: ['5.2']
+      , unicodeEscapes: true
+      , bitwiseOperators: true
+      , integerDivision: true
+    }
+    , 'LuaJIT': {
       // XXX: LuaJIT language features may depend on compilation options; may need to
       // rethink how to handle this. Specifically, there is a LUAJIT_ENABLE_LUA52COMPAT
       // that removes contextual goto. Maybe add 'LuaJIT-5.2compat' as well?
-      labels: true,
-      contextualGoto: true,
-      hexEscapes: true,
-      skipWhitespaceEscape: true,
-      strictEscapes: true,
-      unicodeEscapes: true,
-      imaginaryNumbers: true,
-      integerSuffixes: true
-    },
+        labels: true
+      , hexEscapes: true
+      , skipWhitespaceEscape: true
+      , strictEscapes: true
+      , unicodeEscapes: true
+      , contextualGoto: true
+      , imaginaryNumbers: true
+      , integerSuffixes: true
+    }
     // NOTE: p8 file format layout (not the png.p8 but the text p8)
-    'PICO-8': {
+    , 'PICO-8': {
       // XXX: (move to appropriate doc please)
       // The PICO-8 file format (.p8, text) defines a set of rules that must be followed
       // for a file to be correctly loaded:
@@ -3401,8 +3396,8 @@
       //  pico-8 cartridge // http://www.pico-8.com
       //  version VER
       //  ```
-      strictP8FileFormat: true,
-      p8Sections: [
+        strictP8FileFormat: true
+      , p8Sections: [
           '__lua__'
         , '__gfx__'
         , '__gff__'
@@ -3411,14 +3406,14 @@
         , '__sfx__'
         , '__music__'
       ]
-    },
+    }
     // NOTE: first implemented version (some features may have existed before 0.2.1)
-    'PICO-8-0.2.1': {
-      _inherits: ['5.2', 'PICO-8'],
-      integerSuffixes: false,
-      imaginaryNumbers: false,
-      bitwiseOperators: true,
-      integerDivision: false,
+    , 'PICO-8-0.2.1': {
+        _inherits: ['5.2', 'PICO-8']
+      , integerSuffixes: false
+      , imaginaryNumbers: false
+      , bitwiseOperators: true
+      , integerDivision: false
       // Below rules were added for PICO-8
       // XXX: (move to appropriate doc please)
       // The added syntax for singleLine[..] is pretty broken, see the test
@@ -3459,30 +3454,30 @@
       // singleLineIf and singleLineWhile cannot be empty
       // `if (1)` error, `if (1) else` no error, `if (1) end do` no error (closing with a proper 'end')
       // `while (1)` error
-      binLiteral: true,           // eg. 0b101010
-      noExponentLiteral: true,    // eg. 1e-1
-      singleLineIf: true,         // if ::= 'if' '(' exp ')' block ['else' block] '\n'
-      singleLineWhile: true,      // while ::= 'while' '(' exp ')' block '\n'
-      singleLinePrint: true,      // slprint ::= '\n' '?' [explist] '\n'   the result is a CallStatement node
-      assignmentOperators: true,  // a += b
-      traditionalNotEqual: true,  // a != b
-      traditionalComments: true,  // '//' is a comment (this would take precedence on the int div)
-      noDeepLongStringComments: true, // '--[=*[' does not start a multiline (longstring) comment
-      bitshiftAdditionalOperators: true, // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
-      peekPokeOperators: true,    // @a   %a   $a
-      backslashIntegerDivision: true,  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above), same about assignment operators)
-      smileyBitwiseXor: true      // a ^^ b (also disables a ~ b ie. **makes it invalid** (maybe), same about assignment operators)
-    },
-    'PICO-8-0.2.2': {
-      _inherits: ['PICO-8-0.2.1'],
-      p8scii: true, // additional string escape sequences
-    },
-    'PICO-8-0.2.3': {
-      _inherits: ['PICO-8-0.2.2'],
-      singleLinePrintNoLineDependency: true, // actual behavior is to be tested more, but '?' shorthand can appear same line as an single line if/while
-      allowEmptySingleLineIf: true, // 'if' single line syntax may be empty of statement using a ';'
-      allowEmptySingleLineWhile: true, // 'while' single line syntax may be empty of statement using a ';'
-    },
+      , binLiteral: true           // eg. 0b101010
+      , noExponentLiteral: true    // eg. 1e-1
+      , singleLineIf: true         // if ::= 'if' '(' exp ')' block ['else' block] '\n'
+      , singleLineWhile: true      // while ::= 'while' '(' exp ')' block '\n'
+      , singleLinePrint: true      // slprint ::= '\n' '?' [explist] '\n'   the result is a CallStatement node
+      , assignmentOperators: true  // a += b
+      , traditionalNotEqual: true  // a != b
+      , traditionalComments: true  // '//' is a comment (this would take precedence on the int div)
+      , noDeepLongStringComments: true // '--[=*[' does not start a multiline (longstring) comment
+      , bitshiftAdditionalOperators: true // a >>> b   a <<> b   a >>< b (there assignment operators are added by "assignmentOperators: true")
+      , peekPokeOperators: true    // @a   %a   $a
+      , backslashIntegerDivision: true  // a \ b (also disables a // b ie. **makes it invalid** (maybe -- see "integerDivision: false" above), same about assignment operators)
+      , smileyBitwiseXor: true      // a ^^ b (also disables a ~ b ie. **makes it invalid** (maybe), same about assignment operators)
+    }
+    , 'PICO-8-0.2.2': {
+        _inherits: ['PICO-8-0.2.1']
+      , p8scii: true // additional string escape sequences
+    }
+    , 'PICO-8-0.2.3': {
+        _inherits: ['PICO-8-0.2.2']
+      , singleLinePrintNoLineDependency: true // '?' shorthand can appear same line as an single line if/while
+      , allowEmptySingleLineIf: true // 'if' single line syntax may be empty of statement using a ';'
+      , allowEmptySingleLineWhile: true // 'while' single line syntax may be empty of statement using a ';'
+    }
   };
 
   // Expand the '_inherits' of each version (recursively).
@@ -3578,6 +3573,8 @@
   function end(_input) {
     if ('undefined' !== typeof _input) write(_input);
 
+    var revertStrictP8FileFormat = false;
+
     if (!features.strictP8FileFormat) {
       // Ignore shebangs.
       if (input && input.substr(0, 2) === '#!')
@@ -3586,7 +3583,7 @@
       if (!options.ignoreStrictP8FileFormat) {
         // Check for header
         index = input.indexOf("pico-8 cartridge");
-        if (index < 0) raise(null, errors.expected, "pico-8 cartridge", '<bof>');
+        if (index < 0) raise(null, errors.missingHeader, "pico-8 cartridge");
         index += 15;
         // Ignore the header line
         while (index < length && !isLineTerminator(input.charCodeAt(++index)));
@@ -3605,6 +3602,9 @@
         if (!match) index = input.length;
         // Count any newline that were passed (the slice [0:index] ends with a EOL)
         else line = input.slice(0, index).split('\n').length;
+      } else {
+        revertStrictP8FileFormat = true;
+        features.strictP8FileFormat = false;
       }
       if (!currentP8Section) currentP8Section = '__lua__';
     }
@@ -3618,9 +3618,11 @@
     if (options.comments) chunk.comments = comments;
     if (options.scope) chunk.globals = globals;
 
+    if (revertStrictP8FileFormat) features.strictP8FileFormat = true;
+
     /* istanbul ignore if */
     if (locations.length > 0)
-      throw new Error('Location tracking failed. This is most likely a bug in luaparse');
+      throw new Error('Location tracking failed. This is most likely a bug in pico8parse.');
 
     return chunk;
   }
