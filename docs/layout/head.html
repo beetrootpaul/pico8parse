@@ -14,6 +14,49 @@
         text-decoration: underline;
       }
       h2, h3, h4 { margin-top: 1em; }
+      @media only screen and (max-width: 800px) {
+        #theme-toggle {
+          width: 24px !important;
+          height: 24px !important;
+        }
+      }
+      #theme-toggle {
+        float: right;
+        width: 48px;
+        height: 48px;
+        border: 0px;
+        background-size: 100% 100% !important;
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAATcSURBVGhD7ZpPSGVVHMdPKtIiQlxIYmBIRqKCgf8bsMUsEl0MkRnRoj+bwkXtBiyIwEjcuBkIiZiCURRdmDjooFCBgyMuRoanKMkDRVOEZ4KSo2j2/Z73O7d357373n33eq8N9IEfv985F57ne/7dc3/HZ1SW7O/vvwHXBmuEvQx7AUZ2YeuwB7C7hYWFv7IyaFwJQKPz4N6HfQFjo91AMd/A7kDMma4JgIwC0PgquNuwWl2RJaurq6q3t/evaDT6B4oUtQT7DTYXiUSO4H2RVgAaz17/HvasrvDIycmJ6uvrUzMzM1KjeQybhv0AIZO6xgO54pNA4z+HG4Bx+vgiLy9PtbS0qKOjI7WysiK1+ndfhb1XVFR0Axbb29uzHrolpQDpeTb+UmloaFC7u7tqfZ0zyQY3gncg4hpsHkL249WZSRKAxtfA/Qzz3fOpqK+vV/Pz8/w7UmOjDPYRRPzudjRsAvCjbPRd2Iu6IgA4nWpqatTExIS6uLiQWhv5MI5GHkT8Eq9yJke84RMYRyBQSktLVUdHh5Qc+bKqqqpfYkesEUDvPwc3CqMPnPLycjU+Pq7OztK+IhozjUTiCHDhmrdq4BQUFKjW1lYppYUj8bbESSQK+Fh8aLS18UTiitsQkfIEoAVg+rwE5+lN6wdOo5KSEimlhdP6u3hox4zAdfGhU1vrut+up5pKRkCD+NCpqKiQyBU8TNowAgLfOp0oK+O7yzU1GIV2iTVGQGi7z5PgqC2Ra2ybjREQ2Js3E9jnJXLNmxgF611lBDxN8Gh/LR4+nQJIi3hLwJb40MExQaKssDYdI4Af5FeCw7E6E9Zb2QiIiA+dzc1NibLC2jWNgAXxoZPwiZkNSbtQKDmcVCws+Os7LQAvk1V8p/6ta0IkGo2q7e1tKWUFMxoaMwJMecQkDI3paWZVPGFtOpaAqampR4eHh1IKHv6tyUnP6aBV8f8KODg4eDg0NCSl4BkbG9N5Io9Yu6YlANwfHh5WGxsbUgyOra0tNTg4KCVP3BdvEzB7fn7+uKenJ9OHti/42/wbp6enUpM1XMCz8TAhK4FX+ilOho2xWOwVTCfV3NwsTy6X/v5+NTc3JyVPTEcikZ8ktie2IOAY7t21tTV1fHys6urq4g8uiYGBATU6ysyNL26is61FbBPABxDB9EohVOpzClOBOTmJMy17OG3Y85fQ+HW0q0tijU0AgYA/4d5izJFYXFxU1dXVOo/jBW4K3d3dfqeN4TN08iOJNSnvB/DFMw/HKyRNfn6+am9vV52dnaq4uFhq07Ozs6NGRkb0Xu9jwSbyAL3fJLGFkwDm7R/CbBcbubm5OjHb1NSkKisrdU7HjAwXPo8Fy8vLOvu8tLSksKvpZ5cAd57XIMCa+wbHGxqI+ACOV0v/BT5E43+U2EbSGjBgri1hPbB7ral0RdxC47+VOAlHAQQi7kEEPx5CTzsK7PUutMPxpJxWAIGAe3DPw8IeiVuwLvR+2mNBxmtWg6wJJlh93Vi6gAv2U6c5/ySuBRDZnbiwgxoN3vJzwSbtNk5kJcAAIXxbfwVze2ufCV5bfo2G34kX3eNJgAFCbsAxV8n0fLZTy5wqedE9rms84EuAAUKYJaCI11mEcapx9zKi2Fh+BnJq8GOE5/lZNNz3vxr8z9Wi1D9cnJUKj6GpHQAAAABJRU5ErkJggg==');
+      }
+      /* dark theme */
+      body.dark #theme-toggle {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAUISURBVGhD7ZlbKHZZGMcfh+aLcchhHOKGhIRIEVE+SUOJzNVw5UrkcM2FzJUripRckItRDo3TyKmEyGk+5VhTyAUiwoiImG/Wf1n7nXe/+/Bupmym71e7vdZ697vf5/+utZ71rGfRR8dB3F9EdHR0ALtNsyuSN1gRFxdHzc3NoianpqaG5ufnRU3GCbs+b21t/flcNY6juBtGz3iQnJwsSkp0PuPvZO9WfaceLxJgz3iQlpYmSkpSUlJESZVXiTAswIjxQUFBFBwcLGpKfHx8KCoqStRUebEIQwKamppiMzMzv7Ci7ovt/MOcpKQkUdIkgPXiQktLS46o6+Ik7prA+IyMjD9yc3O9EhMT6ejoiE5OMOfkeHt7U3FxMfn7+4sWdTw9PWl6epru7+9Fy79ERERQbW0tFRUVubCe/Dk8PPzL6OjojvhYFV0vJBnPhsZ3oomzsLBAbW1ttL+/T6mpqZSXl0cJCQnk7OwsntDn8fGRVldXaWhoiHslDL2SkhJKT08XTzxzeXn599jYWG55efmoaFKgKUDLeAkYgZ7QG/NGODw8pICAAE3x9kSoDiF7xgNHR0fy8PAQtdeDd+BdWri4uDhgOIWEhCxNTEzsiWYLim/C2wwODv7m6+urafxb4+7u7jg5OfmrmneSCZBc5dnZWVh3d/dz4ztgZGSEDg4OfmBFhYu1CJCMZxd/oKenh66vr1E0ldvbW+rs7BQ15TrBBdgaD25ubqy/aBr4Iy8uLkSNIxMh9YDqCgs3By9hFufn59TX1ydqMqQ/3CJAYTx4eHjgPWEWbC7q/T5EyCexLYgeIyNVtb0J+G296BboCigoKBAl87Bng6YAxCwID8wGNsAWLXgowWb0V9zxIAI2RJXoOldXVzSbDlwpYifETYjDrq6ueDvbwTlwAfX19V9hMGJ1owGZmWxsbNDi4iJVV1c/C2B+lvfAR4OF8A66k/gj8E2A2XwTYDZ8R7a2tlZ3enpKDswp+fn56e6QzATb2PX1dRoYGKDGxkba29v7RbaQAbaF44tYVlaWoTTJW4DFa2pqivt+6+DOspBZC5DAqgyl72Fhy8/Pt90TcCBAc6xgucbybTbLy8uqxkvoDvb+/n5RMg9sqvTQFYAxZ+aO7Pj4WCsdb0ESoMwVMpAxQ9LJLAIDAyksLEzUFHCbJQGf2aUQUVZWZvokrqioECUZ/EAEBS5AnIzIRMTExOjm+t+K+Ph4vkexghsvneZY5oCtCCRb3wsYCU5OfM2VGQ9kk1gSkZmZ+VdsbOxz4zsgNDSUcnJysA1TnKPJBAA8wCZOEbLCosl0YAtzKIW2xgPV7DQOFXC4gKwwssOiWQbSjjjs8PLyEi2vY2fn+fxCa//9qvQ60BKBk5Wuri6qq6uj3t5e2t7eJjc3N+7yjAaBCMqWlpaQxqfW1lYaHh7mbXCZnz59Ek/9xwMOCZxVZWdn/44UN3sZtbe3qy7tiJ1gEMarHlgYS0tLLZkFa3BMVVhYyE98bm9v7RoPNHtAAj2Bw4WGhoYf2Qu/v7u7E5/IQc9gOMHt6TE+Pk5zc3OiJgfvXllZoZmZmTPWIz9VVVWNi480sdsDEiIbjISq5tKMIdDR0SFq6lRWVmL/IWqqKFylHsYGLUNyseyyLHa27O7uEjZGWmDib25uipoqLzIeGBYAjIjA5kMLBIdPT0+ipuDFxoMXCQD2RMzOzoqSEh1xrzL+fwDRP1Z7HWd0Q4j+AAAAAElFTkSuQmCC');
+      }
+      body.dark {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+      }
+      body.dark .hero-unit {
+        background-color: #2c2c2c;
+      }
+      body.dark .nav>li>a:hover, body.dark .nav>li>a:focus {
+        background-color: #2c2c2c;
+      }
+      body.dark code, body.dark pre, body.dark pre > code, body.dark textarea, body.dark select {
+        background-color: #252526;
+        border-color: #333;
+        color: #d4d4d4;
+      }
+    </style>
+    <style>
+      /* PrismJS 1.25.0
+      https://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript+json+typescript */
+      body.bright code[class*=language-],body.bright pre[class*=language-]{color:#000;background:0 0;text-shadow:0 1px #fff;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}body.bright code[class*=language-] ::-moz-selection,body.bright code[class*=language-]::-moz-selection,body.bright pre[class*=language-] ::-moz-selection,body.bright pre[class*=language-]::-moz-selection{text-shadow:none;background:#b3d4fc}body.bright code[class*=language-] ::selection,body.bright code[class*=language-]::selection,body.bright pre[class*=language-] ::selection,body.bright pre[class*=language-]::selection{text-shadow:none;background:#b3d4fc}@media print{body.bright code[class*=language-],body.bright pre[class*=language-]{text-shadow:none}}body.bright pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}body.bright :not(pre)>code[class*=language-],body.bright pre[class*=language-]{background:#f5f2f0}body.bright :not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}body.bright .token.cdata,body.bright .token.comment,body.bright .token.doctype,body.bright .token.prolog{color:#708090}body.bright .token.punctuation{color:#999}body.bright .token.namespace{opacity:.7}body.bright .token.boolean,body.bright .token.constant,body.bright .token.deleted,body.bright .token.number,body.bright .token.property,body.bright .token.symbol,body.bright .token.tag{color:#905}body.bright .token.attr-name,body.bright .token.builtin,body.bright .token.char,body.bright .token.inserted,body.bright .token.selector,body.bright .token.string{color:#690}body.bright .language-css .token.string,body.bright .style .token.string,body.bright .token.entity,body.bright .token.operator,body.bright .token.url{color:#9a6e3a;background:hsla(0,0%,100%,.5)}body.bright .token.atrule,body.bright .token.attr-value,body.bright .token.keyword{color:#07a}body.bright .token.class-name,body.bright .token.function{color:#dd4a68}body.bright .token.important,body.bright .token.regex,body.bright .token.variable{color:#e90}body.bright .token.bold,body.bright .token.important{font-weight:700}body.bright .token.italic{font-style:italic}body.bright .token.entity{cursor:help}
+    </style>
+    <style>
+      /* PrismJS 1.25.0
+      https://prismjs.com/download.html#themes=prism-tomorrow&languages=markup+css+clike+javascript+json+typescript */
+      body.dark code[class*=language-],body.dark pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}body.dark pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}body.dark :not(pre)>code[class*=language-],body.dark pre[class*=language-]{background:#2d2d2d}body.dark :not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}body.dark .token.block-comment,body.dark .token.cdata,body.dark .token.comment,body.dark .token.doctype,body.dark .token.prolog{color:#999}body.dark .token.punctuation{color:#ccc}body.dark .token.attr-name,body.dark .token.deleted,body.dark .token.namespace,body.dark .token.tag{color:#e2777a}body.dark .token.function-name{color:#6196cc}body.dark .token.boolean,body.dark .token.function,body.dark .token.number{color:#f08d49}body.dark .token.class-name,body.dark .token.constant,body.dark .token.property,body.dark .token.symbol{color:#f8c555}body.dark .token.atrule,body.dark .token.builtin,body.dark .token.important,body.dark .token.keyword,body.dark .token.selector{color:#cc99cd}body.dark .token.attr-value,body.dark .token.char,body.dark .token.regex,body.dark .token.string,body.dark .token.variable{color:#7ec699}body.dark .token.entity,body.dark .token.operator,body.dark .token.url{color:#67cdcc}body.dark .token.bold,body.dark .token.important{font-weight:700}body.dark .token.italic{font-style:italic}body.dark .token.entity{cursor:help}body.dark .token.inserted{color:green}
     </style>
   </head>
   <body>
@@ -21,6 +64,7 @@
       <div class="container">
         <div class="row">
           <div class="span6">
+            <button id="theme-toggle" onclick="toggleTheme()"></button>
             <h1>pico8parse</h1>
             <p>A Lua parser written in JavaScript, with support for the PICO-8 flavour.<br/>Luaparse is originally written by Oskar Schöldström for his bachelor's thesis at Arcada.</p>
           </div>
@@ -36,6 +80,9 @@
               <li><a href="fork.html">About this fork</a></li>
               <li><a href="coverage.html">Coverage</a></li>
               <li><a href="examples.html">Examples</a></li>
+              <li><a href="ast-nodes.html">AST nodes</a></li>
+              <li><a href="features.html">Features (for Lua versions)</a></li>
+              <li><a href="playground.html">Playground</a></li>
             </ul>
           </div>
         </div>

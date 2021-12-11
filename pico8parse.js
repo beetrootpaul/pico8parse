@@ -1934,15 +1934,15 @@
       if (indexOf(['+=', '-=', '*=', '/=', '%=', '^=', '..='], token.value) >= 0) return true;
       // Least common
       return indexOf([
-        features.backslashIntegerDivision && '\\=',
-        features.bitwiseOperators && '|=',
-        features.bitwiseOperators && '&=',
-        features.bitwiseOperators && '<<=',
-        features.bitwiseOperators && '>>=',
-        features.bitshiftAdditionalOperators && '>>>=',
-        features.bitshiftAdditionalOperators && '<<>=',
-        features.bitshiftAdditionalOperators && '>><=',
-        features.smileyBitwiseXor && '^^='
+          features.backslashIntegerDivision && '\\='
+        , features.bitwiseOperators && '|='
+        , features.bitwiseOperators && '&='
+        , features.bitwiseOperators && '<<='
+        , features.bitwiseOperators && '>>='
+        , features.bitshiftAdditionalOperators && '>>>='
+        , features.bitshiftAdditionalOperators && '<<>='
+        , features.bitshiftAdditionalOperators && '>><='
+        , features.smileyBitwiseXor && '^^='
       ], token.value) >= 0;
     }
     return false;
@@ -3396,8 +3396,8 @@
       //  pico-8 cartridge // http://www.pico-8.com
       //  version VER
       //  ```
-      strictP8FileFormat: true,
-      p8Sections: [
+        strictP8FileFormat: true
+      , p8Sections: [
           '__lua__'
         , '__gfx__'
         , '__gff__'
@@ -3474,7 +3474,7 @@
     }
     , 'PICO-8-0.2.3': {
         _inherits: ['PICO-8-0.2.2']
-      , singleLinePrintNoLineDependency: true // actual behavior is to be tested more, but '?' shorthand can appear same line as an single line if/while
+      , singleLinePrintNoLineDependency: true // '?' shorthand can appear same line as an single line if/while
       , allowEmptySingleLineIf: true // 'if' single line syntax may be empty of statement using a ';'
       , allowEmptySingleLineWhile: true // 'while' single line syntax may be empty of statement using a ';'
     }
