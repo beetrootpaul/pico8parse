@@ -3,6 +3,7 @@ docs/*
 !docs/*.md
 !docs/*.1
 !docs/layout/
+!docs/util/
 dist
 logs
 components
