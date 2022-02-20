@@ -22,7 +22,7 @@ function usage() {
     , "\nOptions:"
     , "  -c|--code [code]   parse code snippet"
     , "  -f|--file [file]   parse from file"
-    , "  -b|--beautify      output an indenteted AST"
+    , "  -b|--beautify      output an indented AST"
     , "  --[no]-comments    store comments. defaults to true"
     , "  --[no]-scope       store variable scope. defaults to false"
     , "  --[no]-locations   store location data on syntax nodes. defaults to false"
