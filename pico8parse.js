@@ -88,11 +88,11 @@
     , luaVersion: '5.1'
     // Encoding mode: how to interpret code units higher than U+007F in input.
     , encodingMode: 'none'
-    // Ignore string escape sequences.
-    , ignoreEscape: false
     // This option overrides the `strictP8FileFormat` feature, making it possible to parse
     // snippets lacking the proper header and sections.
     , ignoreStrictP8FileFormat: false
+    // Ignore "P8SCII" string escape sequences.
+    , ignoreP8scii: false
   };
 
   function encodeUTF8(codepoint, highMask) {
@@ -1135,7 +1135,6 @@
         raise(null, errors.unfinishedString, input.slice(tokenStart, index - 1));
       }
       if (92 === charCode) { // backslash
-        // TODO: options.ignoreEscape
         if (!encodingMode.discardStrings) {
           var beforeEscape = input.slice(stringStart, index - 1);
           string += encodingMode.fixup(beforeEscape);
@@ -1539,7 +1538,8 @@
         return input.charAt(index++);
     }
     if (features.p8scii) {
-      var sequence = readEscapeSequenceP8SCII(escapedChar, sequenceStart);
+      if (options.ignoreP8scii) return '';
+      var sequence = readEscapeSequenceP8scii(escapedChar, sequenceStart);
       if (null !== sequence) return sequence;
     }
 
@@ -1548,7 +1548,7 @@
     return input.charAt(index++);
   }
 
-  function readEscapeSequenceP8SCII(escapedChar, sequenceStart) {
+  function readEscapeSequenceP8scii(escapedChar, sequenceStart) {
     // Some escape sequences might be wrongly parsed/modified/replaced
     // be it here or in the switch above (maybe)
 
