@@ -937,11 +937,8 @@
   // section start (specifically must be preceded by an EOL)
 
   function scanP8SectionStart() {
-    var section = "";
-
-    // Scan for one the standard sections
     for (var k = 0; k < features.p8Sections.length; k++) {
-      section = features.p8Sections[k];
+      var section = features.p8Sections[k];
       if (input.slice(index, index+section.length) === section) {
         index += section.length;
         while (index < length && !isLineTerminator(input.charCodeAt(index))) index++;
@@ -949,18 +946,6 @@
         return section;
       }
     }
-
-    // Not a standard section, try for a meta section
-    var subtext = input.slice(index);
-    var match = subtext.match(/__meta:\w+?__/); // maybe .*?__, TODO: test actual behavior
-    if (match) {
-      section = match[0];
-      index += section.length;
-      while (index < length && !isLineTerminator(input.charCodeAt(index))) index++;
-      if (isLineTerminator(input.charCodeAt(index))) consumeEOL();
-      return section;
-    }
-
     return null;
   }
 
@@ -3421,7 +3406,17 @@
       , allowAnyBeforeSingleLineWhile: true // 'while' single line no longer needs to be preceded by a blank or number
     }
     , 'PICO-8-0.2.4c': {
-        p8MetaSections: true // with a heading of '__meta:somestring__' are preserved by, but not (yet?) utilised by PICO-8 itself
+        _inherits: ['PICO-8-0.2.4']
+      , p8Sections: [
+          '__lua__'
+        , '__gfx__'
+        , '__gff__'
+        , '__label__'
+        , '__map__'
+        , '__sfx__'
+        , '__music__'
+        , '__meta:' // (officially:) << with a heading of '__meta:somestring__' are preserved by, but not (yet?) utilised by PICO-8 itself >>
+      ]
     }
   };
 
