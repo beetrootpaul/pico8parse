@@ -962,8 +962,9 @@
     var character = input.charAt(index)
       , next = input.charAt(index + 1);
 
-    var literal = ('0' === character && 'xX'.indexOf(next || null) >= 0) ?
-      readHexLiteral() : readDecLiteral();
+    var literal = ('0' === character && 'bB'.indexOf(next || null) >= 0) ?
+      readBinLiteral() : ('0' === character && 'xX'.indexOf(next || null) >= 0) ?
+        readHexLiteral() : readDecLiteral();
 
     var foundImaginaryUnit = readImaginaryUnitSuffix()
       , foundInt64Suffix = readInt64Suffix();
@@ -1094,6 +1095,55 @@
     return {
       value: (digit + fraction) * binaryExponent,
       hasFractionPart: foundFraction || foundBinaryExponent
+    };
+  }
+
+  // PICO-8 binaries acts similarly to hexadecimals (optional fraction part).
+  // Because this is only used by PICO-8 which does not support number suffixes,
+  // this is a simplified algorithm (eg. no BinaryExp, assumes !noTrailingDotInBinNumeral..).
+  //
+  //     Digit := toDec(digit)
+  //     Fraction := toDec(fraction) / 2 ^ fractionCount
+  //     Number := Digit + Fraction
+
+  function readBinLiteral() {
+    var fraction = 0 // defaults to 0 as it gets summed
+      , digit, fractionStart, digitStart;
+
+    digitStart = index += 2; // Skip 0b part
+
+    // A minimum of one bin digit is required.
+    // "0x.1" is valid (will assume so as only PICO-8-xyz get there)
+    if (!isBinDigit(input.charCodeAt(index)) && '.' !== input.charAt(index))
+      raise(null, errors.malformedNumber, input.slice(tokenStart, index));
+
+    while (isBinDigit(input.charCodeAt(index))) ++index;
+    // Convert the binary digit to base 10.
+    if (digitStart < index)
+      digit = parseInt(input.slice(digitStart, index), 2);
+    else digit = 0; // No decimal part.
+
+    // Fraction part is optional.
+    var foundFraction = false;
+    if ('.' === input.charAt(index)) {
+      foundFraction = true;
+      fractionStart = ++index;
+
+      while (isBinDigit(input.charCodeAt(index))) ++index;
+      fraction = input.slice(fractionStart, index);
+
+      // Empty fraction parts should default to 0, others should be converted
+      // 0.x form so we can use summation at the end.
+      fraction = (fractionStart === index) ? 0
+        : parseInt(fraction, 2) / Math.pow(2, index - fractionStart);
+    }
+
+    // No binary exponents.
+
+    return {
+      value: digit + fraction,
+      hasFractionPart: foundFraction,
+      hasExponentPart: false
     };
   }
 
@@ -1387,6 +1437,10 @@
     return (charCode >= 48 && charCode <= 57) || (charCode >= 97 && charCode <= 102) || (charCode >= 65 && charCode <= 70);
   }
 
+  function isBinDigit(charCode) {
+    return 48 === charCode || 49 === charCode;
+  }
+
   // From [Lua 5.2](http://www.lua.org/manual/5.2/manual.html#8.1) onwards
   // identifiers cannot use 'locale-dependent' letters (i.e. dependent on the C locale).
   // On the other hand, LuaJIT allows arbitrary octets ≥ 128 in identifiers.
@@ -1436,6 +1490,37 @@
   function isUnary(token) {
     if (Punctuator === token.type) return '#-~'.indexOf(token.value) >= 0;
     if (Keyword === token.type) return 'not' === token.value;
+    return false;
+  }
+
+  // Check if the punctuator is a valid assignment operator.
+  // (eg. excludes '<=', '>=')
+  //
+  // No, this is not quite optimized as would only get called every so ofter
+  // and will most of the time hit for '<=', '>=' as returning false and
+  // potentially some '+=', '-=', .. (the first list) as returning true
+
+  function isAssignmentOperator(token) {
+    if (1 === token.value.length) return false;
+
+    if (Punctuator === token.type && '=' === token.value.charAt(token.value.length-1)) {
+      // Most common
+      if ('<=' === token.value || '>=' === token.value) return false;
+      // Feature independents
+      if (indexOf(['+=', '-=', '*=', '/=', '%=', '^=', '..='], token.value) >= 0) return true;
+      // Least common
+      return indexOf([
+        features.backslashIntegerDivision && '\\='
+        , features.bitwiseOperators && '|='
+        , features.bitwiseOperators && '&='
+        , features.bitwiseOperators && '<<='
+        , features.bitwiseOperators && '>>='
+        , features.bitshiftAdditionalOperators && '>>>='
+        , features.bitshiftAdditionalOperators && '<<>='
+        , features.bitshiftAdditionalOperators && '>><='
+        , features.smileyBitwiseXor && '^^='
+      ], token.value) >= 0;
+    }
     return false;
   }
 
@@ -2190,7 +2275,14 @@
       return unexpected(token);
     }
 
-    expect('=');
+    var assignmentOperator = false;
+
+    // Try to find the operator if this is really an assignment operator statement
+    // XXX: not sure this should be done like this...
+    if (features.assignmentOperators && isAssignmentOperator(token)) {
+      assignmentOperator = token.value.slice(0, token.value.length-1);
+      next();
+    } else expect('=');
 
     var values = [];
 
@@ -2199,7 +2291,10 @@
     } while (consume(','));
 
     pushLocation(startMarker);
-    return finishNode(ast.assignmentStatement(targets, values));
+    var assignmentNode = assignmentOperator ?
+      ast.assignmentOperatorStatement(assignmentOperator, targets, values)
+      : ast.assignmentStatement(targets, values);
+    return finishNode(assignmentNode);
   }
 
   // ### Non-statements
